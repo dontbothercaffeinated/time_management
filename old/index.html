@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Time Manager</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="app">
+        <h1>Class Project Time Manager</h1>
+       
+        <div id="course-form">
+            <input type="text" id="course-name" placeholder="Course Name">
+            <button onclick="addCourse()">Add Course</button>
+        </div>
+       
+        <div id="project-form">
+            <select id="course-select"></select>
+            <input type="text" id="assignment-name" placeholder="Assignment Name">
+            <input type="date" id="due-date">
+            <button onclick="addAssignment()">Add Assignment</button>
+        </div>
+
+
+        <div id="timer-section">
+            <input type="number" id="timer-input" value="25" placeholder="Minutes to Work">
+            <button id="timer-button" onclick="toggleTimer()">Start Working</button>
+            <span id="timer-display" style="display: none;">25:00</span>
+        </div>
+
+
+        <div id="filter-section">
+            <select id="filter-select" onchange="filterAssignments()">
+                <option value="all">All Courses</option>
+            </select>
+        </div>
+
+
+        <div id="project-list">
+            <ul id="assignments"></ul>
+        </div>
+    </div>
+    <script src="project.js"></script>
+</body>
+</html>

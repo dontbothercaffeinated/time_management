@@ -1,0 +1,12 @@
+{
+    "name": "assignment-tracker",
+    "version": "1.0.0",
+    "description": "A simple assignment tracking application",
+    "main": "server.js",
+    "scripts": {
+        "start": "node server.js"
+    },
+    "dependencies": {
+        "express": "^4.17.1"
+    }
+}
