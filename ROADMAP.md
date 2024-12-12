@@ -16,6 +16,12 @@
 
 ## Future
 
+- **In-App Working Statistics**: Provide a page showing working statistics
+    - Add working hours and total assignments completed
+        -Daily
+        -Weekly
+        -Monthly
+        -Custom filtering
 - **UI Enhancement: Main Page**: Make the main page follow styles proposed in major modern applications
 - **View Assignments in Calendar View**: 
     - Create functionality to flip between pages in the application
