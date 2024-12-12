@@ -4,6 +4,8 @@ Base use case has been to manage multiple assignments in multiple courses in uni
 
 Use the filter to see the assignment ranking order for tasks in specific courses, or all courses.
 
-Install dependencies: (1) cd server (2) npm install
+1. Create database files: (a) create "db" directory in project root (b) create "assignments.json" inside db directory (c) create "courses.json" inside db directory
 
-Run instructions: (1) cd server (2) npm start (3) open localhost:3000 in your prefered web browser 
+2. Install dependencies: (a) cd server (b) npm install
+
+3. Run instructions: (a) cd server (b) npm start (c) open localhost:3000 in your prefered web browser 
