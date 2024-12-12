@@ -67,10 +67,12 @@ function selectTask(index) {
 
 async function handleAddCourse(event) {
     event.preventDefault();
-    const courseName = document.getElementById('course-name').value.trim();
+    const courseNameInput = document.getElementById('course-name');
+    const courseName = courseNameInput.value.trim();
     if (courseName) {
         await window.electron.addCourse(courseName);
         fetchData();
+        courseNameInput.value = ''; // Clear the input field after successful addition
     }
 }
 
