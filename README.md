@@ -4,4 +4,5 @@ Base use case has been to manage multiple assignments in multiple courses in uni
 
 Use the filter to see the assignment ranking order for tasks in specific courses, or all courses.
 
+Install dependencies: (1) cd server (2) npm install
 Run instructions: (1) cd server (2) npm start (3) open localhost:3000 in your prefered web browser 
