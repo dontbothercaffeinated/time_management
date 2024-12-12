@@ -1,3 +1,11 @@
+# Persistent
+
+- **Develop ranking algorithm**
+- **Add flexibility through input into algorithm**
+- **Provide advanced options for ranking algorithm based on leading theories**
+
+# Stage Based
+
 ## Now
 
 - **Core Desktop App Functionality**: Create a blank application that opens on windows and mac.
