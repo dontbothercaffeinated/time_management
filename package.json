@@ -1,0 +1,11 @@
+{
+    "name": "time_management_app",
+    "version": "1.0.0",
+    "main": "src/main.js",
+    "scripts": {
+      "start": "electron ."
+    },
+    "devDependencies": {
+      "electron": "^25.2.0"
+    }
+  }  
