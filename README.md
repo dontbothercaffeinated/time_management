@@ -6,6 +6,6 @@ Use the filter to see the assignment ranking order for tasks in specific courses
 
 1. Create database files: (a) create "db" directory in project root (b) create "assignments.json" inside db directory (c) create "courses.json" inside db directory
 
-2. Install dependencies: (a) cd server (b) npm install
+2. Install dependencies: run "npm install" in terminal from the project root directory
 
-3. Run instructions: (a) cd server (b) npm start (c) open localhost:3000 in your prefered web browser 
+3. Run instructions: run "npm start" in terminal from the project root directory
