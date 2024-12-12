@@ -22,6 +22,11 @@
         -Weekly
         -Monthly
         -Custom filtering
+- **Report Delivery Using Statistics**
+    - Email Delivery
+    - File backup
+        - Local
+        - Cloud
 - **UI Enhancement: Main Page**: Make the main page follow styles proposed in major modern applications
 - **View Assignments in Calendar View**: 
     - Create functionality to flip between pages in the application
