@@ -35,3 +35,14 @@
         - Create feature to filter calendar by course
 - **Backup features**
     - Add compatibility with major cloud storage providers to backup database files
+- **Create Pages For Assignments**
+    - Create UI for assignment page
+    - Enhance database capability for data related to the assignment page
+    - Easy view related links with single click access
+    - Easy file attachements
+    - Note taking
+    - To do lists
+- **Merge assignment to-do due dates with the calendar view page**:
+    - Create new filter to switch between all, assignments, and to-do
+    - Create different icon style for assignment and to-do list due dates for all view
+- **Create easy integration into popular calendar systems to view calendar through daily user workflow, outside of application**
