@@ -17,3 +17,7 @@ Base use case has been to manage multiple assignments in multiple courses in uni
 ## Roadmap
 
 Check out our [detailed roadmap](ROADMAP.md) for upcoming features and milestones.
+
+## Algorithm Details
+
+Read our wiki article that provides an overview and detailed breakdown of our algorithm by visiting [Our Core Algorithm: Priority Ranking](https://github.com/dontbothercaffeinated/time_management/wiki/Our-Core-Algorithm:-Priority-Ranking)
