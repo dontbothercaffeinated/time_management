@@ -21,6 +21,7 @@
     - Add ability to delete assignments and courses
         - Add single step and click verification for deleting single assignment
         - Add textbox statement verification for deleting courses with all their associated assignments
+    - Add dark mode feature
 
 ## Future
 
