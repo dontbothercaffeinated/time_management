@@ -1,12 +1,14 @@
 let courses = [];
 let assignments = [];
 let selectedAssignmentIndex = 0;
+let timerInterval;
+let timeLeft;
 
 // Fetch data from the backend (filesystem)
 async function fetchData() {
     const response = await window.electron.fetchData();
     courses = response.courses;
-    assignments = response.assignments;
+    assignments = response.assignments.map(a => ({ ...a, workedSeconds: a.workedSeconds || 0 }));
     updateUI();
 }
 
@@ -50,8 +52,8 @@ function updateAssignmentList(filter = 'all') {
         const li = document.createElement('li');
         li.classList.add('assignment-item');
         li.innerHTML = `
-            <input type="radio" name="selected-assignment" class="select-task" onchange="selectTask(${index})" ${index === 0 ? 'checked' : ''}>
-            <span>${assignment.course} - ${assignment.name} - Due: ${new Date(assignment.dueDate).toDateString()}</span>
+            <input type="radio" name="selected-assignment" class="select-task" onchange="selectTask(${index})" ${index === selectedAssignmentIndex ? 'checked' : ''}>
+            <span>${assignment.course} - ${assignment.name} - Due: ${new Date(assignment.dueDate).toDateString()} - Worked: ${(assignment.workedSeconds / 60).toFixed(2)} mins</span>
         `;
         assignmentsList.appendChild(li);
     });
@@ -94,9 +96,69 @@ function resetAddAssignmentForm() {
     document.getElementById('due-date').value = '';
 }
 
+function toggleTimer() {
+    const timerButton = document.getElementById('timer-button');
+    const timerDisplay = document.getElementById('timer-display');
+    const timerInput = parseInt(document.getElementById('timer-input').value);
+
+    if (timerButton.textContent === 'Start Working') {
+        if (!assignments[selectedAssignmentIndex]) {
+            alert('No assignment selected!');
+            return;
+        }
+
+        timerButton.textContent = 'Stop Working';
+        timeLeft = timerInput * 60; // Convert minutes to seconds
+        timerDisplay.style.display = 'block';
+        startTimer();
+    } else {
+        timerButton.textContent = 'Start Working';
+        timerDisplay.style.display = 'none';
+        stopTimer();
+    }
+}
+
+function startTimer() {
+    timerInterval = setInterval(() => {
+        if (timeLeft <= 0) {
+            stopTimer();
+            alert("Time's up!");
+        } else {
+            timeLeft--;
+            updateTimerDisplay();
+        }
+    }, 1000);
+}
+
+function stopTimer() {
+    clearInterval(timerInterval);
+    if (assignments[selectedAssignmentIndex]) {
+        const workedSeconds = parseInt(document.getElementById('timer-input').value) * 60 - timeLeft;
+        assignments[selectedAssignmentIndex].workedSeconds = (assignments[selectedAssignmentIndex].workedSeconds || 0) + workedSeconds;
+        saveTimeToDatabase(assignments[selectedAssignmentIndex]).then(() => {
+            updateAssignmentList();
+        });
+    }
+    timeLeft = null;
+}
+
+function updateTimerDisplay() {
+    const minutes = Math.floor(timeLeft / 60);
+    const seconds = timeLeft % 60;
+    document.getElementById('timer-display').textContent = `${minutes}:${seconds < 10 ? '0' + seconds : seconds}`;
+}
+
+async function saveTimeToDatabase(assignment) {
+    try {
+        await window.electron.updateAssignmentTime(assignment);
+    } catch (error) {
+        console.error('Failed to save time to database:', error);
+    }
+}
+
 document.getElementById('course-form').addEventListener('submit', handleAddCourse);
 document.getElementById('project-form').addEventListener('submit', handleAddAssignment);
-
+document.getElementById('timer-button').addEventListener('click', toggleTimer);
 document.getElementById('filter-select').addEventListener('change', (event) => {
     const filter = event.target.value;
     updateAssignmentList(filter);
