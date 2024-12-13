@@ -23,3 +23,7 @@ Check out our [detailed roadmap](ROADMAP.md) for upcoming features and milestone
 ## Algorithm Details
 
 Read our wiki article that provides an overview and detailed breakdown of our algorithm by visiting [Our Core Algorithm: Priority Ranking](https://github.com/dontbothercaffeinated/time_management/wiki/Our-Core-Algorithm:-Priority-Ranking)
+
+## Cloud backup
+
+Read about how you can enable cloud backup for our application [here.](https://github.com/dontbothercaffeinated/time_management/wiki/Cloud-Backup)
