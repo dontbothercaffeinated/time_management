@@ -4,7 +4,7 @@ let selectedAssignmentIndex = 0;
 let timerInterval;
 let timeLeft;
 
-// Fetch data from the backend (filesystem)
+// Fetch data from the backend (JSON file)
 async function fetchData() {
     const response = await window.electron.fetchData();
     courses = response.courses;
@@ -134,8 +134,9 @@ function stopTimer() {
     clearInterval(timerInterval);
     if (assignments[selectedAssignmentIndex]) {
         const workedSeconds = parseInt(document.getElementById('timer-input').value) * 60 - timeLeft;
-        assignments[selectedAssignmentIndex].workedSeconds = (assignments[selectedAssignmentIndex].workedSeconds || 0) + workedSeconds;
-        saveTimeToDatabase(assignments[selectedAssignmentIndex]).then(() => {
+        const updatedAssignment = assignments[selectedAssignmentIndex];
+        saveTimeToDatabase(updatedAssignment.id, workedSeconds).then(() => {
+            updatedAssignment.workedSeconds += workedSeconds; // Add to existing time
             updateAssignmentList();
         });
     }
@@ -148,9 +149,9 @@ function updateTimerDisplay() {
     document.getElementById('timer-display').textContent = `${minutes}:${seconds < 10 ? '0' + seconds : seconds}`;
 }
 
-async function saveTimeToDatabase(assignment) {
+async function saveTimeToDatabase(assignmentId, additionalSeconds) {
     try {
-        await window.electron.updateAssignmentTime(assignment);
+        await window.electron.saveAssignmentTime(assignmentId, additionalSeconds);
     } catch (error) {
         console.error('Failed to save time to database:', error);
     }

@@ -28,23 +28,49 @@ app.whenReady().then(() => {
 });
 
 ipcMain.handle('fetchData', async () => {
-    const assignments = JSON.parse(fs.readFileSync(assignmentsFile, 'utf8'));
-    const courses = JSON.parse(fs.readFileSync(coursesFile, 'utf8'));
-    return { assignments, courses };
+    try {
+        const assignments = JSON.parse(fs.readFileSync(assignmentsFile, 'utf8'));
+        const courses = JSON.parse(fs.readFileSync(coursesFile, 'utf8'));
+        return { assignments, courses };
+    } catch (error) {
+        console.error('Error reading data files:', error);
+        return { assignments: [], courses: [] };
+    }
 });
 
 ipcMain.handle('addCourse', async (event, course) => {
-    const courses = JSON.parse(fs.readFileSync(coursesFile, 'utf8'));
-    if (!courses.includes(course)) {
-        courses.push(course);
-        fs.writeFileSync(coursesFile, JSON.stringify(courses));
+    try {
+        const courses = JSON.parse(fs.readFileSync(coursesFile, 'utf8'));
+        if (!courses.includes(course)) {
+            courses.push(course);
+            fs.writeFileSync(coursesFile, JSON.stringify(courses, null, 2));
+        }
+    } catch (error) {
+        console.error('Error adding course:', error);
     }
 });
 
 ipcMain.handle('addAssignment', async (event, course, name, dueDate) => {
-    const assignments = JSON.parse(fs.readFileSync(assignmentsFile, 'utf8'));
-    assignments.push({ course, name, dueDate });
-    fs.writeFileSync(assignmentsFile, JSON.stringify(assignments));
+    try {
+        const assignments = JSON.parse(fs.readFileSync(assignmentsFile, 'utf8'));
+        assignments.push({ id: Date.now(), course, name, dueDate, workedSeconds: 0 });
+        fs.writeFileSync(assignmentsFile, JSON.stringify(assignments, null, 2));
+    } catch (error) {
+        console.error('Error adding assignment:', error);
+    }
+});
+
+ipcMain.handle('saveAssignmentTime', async (event, assignmentId, additionalSeconds) => {
+    try {
+        const assignments = JSON.parse(fs.readFileSync(assignmentsFile, 'utf8'));
+        const index = assignments.findIndex(a => a.id === assignmentId);
+        if (index !== -1) {
+            assignments[index].workedSeconds += additionalSeconds; // Increment existing time
+            fs.writeFileSync(assignmentsFile, JSON.stringify(assignments, null, 2));
+        }
+    } catch (error) {
+        console.error('Error saving assignment time:', error);
+    }
 });
 
 app.on('window-all-closed', () => {
