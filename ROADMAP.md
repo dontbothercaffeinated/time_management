@@ -24,7 +24,15 @@
     - Add dark mode feature
 
 ## Future
-
+- **Personal settings page**
+    - Add name
+    - Add school
+    - Add field of study
+    - Add unlimited urls
+- **create sidebar feature on main page using personal settings page details**
+    - Greeting with name
+    - The date & time
+    - One click access to links from personal settings page
 - **Switch to more scaleable database**: The JSON database system needs an upgrade because it cannot efficiently handle concurrent read and write operations, which can lead to data corruption in multi-user or high-frequency scenarios. Additionally, it lacks advanced query capabilities and scalability required for robust applications.
 - **In-App Working Statistics**: Provide a page showing working statistics
     - Add working hours and total assignments completed
