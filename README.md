@@ -1,5 +1,3 @@
-Note: "old1" directory contains code being phased out. When the current directory gains stability, it will be deleted.
-
 Time management application. Assignments are shown in order of priority. Assignments with the nearest due date with the least amount of time logged are given the highest priority. 
 
 Use the filter to see the assignment ranking order for tasks in specific courses, or all courses.
