@@ -1,13 +1,174 @@
+/* General Styles */
 body {
     font-family: Arial, sans-serif;
-    margin: 20px;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f9;
+    color: #333;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
 }
 
+h1 {
+    text-align: center;
+    margin-top: 20px;
+    color: #4CAF50;
+}
+
+/* Form Styles */
 form {
-    margin-bottom: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 20px 0;
 }
 
-ul {
+form input, form select, form button {
+    margin: 0 10px;
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+form button {
+    background-color: #4CAF50;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+form button:hover {
+    background-color: #45a049;
+}
+
+/* Assignments List */
+#assignments {
     list-style-type: none;
     padding: 0;
+    margin: 20px auto;
+    max-width: 600px;
+}
+
+.assignment-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: #fff;
+    margin: 10px 0;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.assignment-item span {
+    font-size: 16px;
+    color: #555;
+}
+
+/* Timer Container - Centering with Flexbox */
+#timer-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin-top: 30px;
+    gap: 15px; /* Adds spacing between the input and button */
+}
+
+#timer-input {
+    width: 80px;
+    text-align: center;
+    padding: 8px;
+    font-size: 18px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    background-color: #fff;
+}
+
+#timer-button {
+    padding: 12px 24px;
+    font-size: 18px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.3s ease;
+}
+
+#timer-button:hover {
+    background-color: #45a049;
+}
+
+/* Priority Visualization */
+.priority-bar {
+    position: relative;
+    width: 100%;
+    height: 10px;
+    background-color: #e0e0e0;
+    border-radius: 5px;
+    margin-top: 10px;
+    overflow: hidden;
+}
+
+.priority-bar .fill {
+    height: 100%;
+    background-color: #4CAF50;
+    transition: width 0.5s ease;
+}
+
+.priority-label {
+    text-align: right;
+    font-size: 12px;
+    color: #777;
+    margin-top: 5px;
+}
+
+/* Filter Select Styles */
+#filter-select {
+    display: block;
+    margin: 20px auto;
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+/* Responsive Design */
+@media (max-width: 600px) {
+    form {
+        flex-direction: column;
+    }
+
+    form input, form select, form button {
+        margin: 10px 0;
+    }
+
+    #assignments {
+        padding: 0 20px;
+    }
+
+    .assignment-item {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .priority-label {
+        text-align: left;
+    }
+
+    #timer-input {
+        width: 100%;
+    }
+
+    #timer-button {
+        width: 100%;
+    }
 }

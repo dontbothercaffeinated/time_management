@@ -6,10 +6,15 @@ let timeLeft;
 
 // Fetch data from the backend (JSON file)
 async function fetchData() {
-    const response = await window.electron.fetchData();
-    courses = response.courses;
-    assignments = response.assignments.map(a => ({ ...a, workedSeconds: a.workedSeconds || 0 }));
-    updateUI();
+    try {
+        const response = await window.electron.fetchData();
+        courses = response.courses;
+        assignments = response.assignments;
+        updateUI();
+        console.log('Data fetched successfully:', response);
+    } catch (error) {
+        console.error('Error fetching data:', error);
+    }
 }
 
 function updateUI() {
@@ -53,7 +58,7 @@ function updateAssignmentList(filter = 'all') {
         li.classList.add('assignment-item');
         li.innerHTML = `
             <input type="radio" name="selected-assignment" class="select-task" onchange="selectTask(${index})" ${index === selectedAssignmentIndex ? 'checked' : ''}>
-            <span>${assignment.course} - ${assignment.name} - Due: ${new Date(assignment.dueDate).toDateString()} - Worked: ${(assignment.workedSeconds / 60).toFixed(2)} mins</span>
+            <span>${assignment.course} - ${assignment.name} - Due: ${new Date(assignment.dueDate).toDateString()} - Worked: ${(assignment.workedSeconds / 60).toFixed(2)} mins - Priority: ${assignment.priority.toFixed(2)}</span>
         `;
         assignmentsList.appendChild(li);
     });
@@ -72,9 +77,14 @@ async function handleAddCourse(event) {
     const courseNameInput = document.getElementById('course-name');
     const courseName = courseNameInput.value.trim();
     if (courseName) {
-        await window.electron.addCourse(courseName);
-        fetchData();
-        courseNameInput.value = ''; // Clear the input field after successful addition
+        try {
+            await window.electron.addCourse(courseName);
+            fetchData();
+            courseNameInput.value = ''; // Clear the input field after successful addition
+            console.log(`Course added: ${courseName}`);
+        } catch (error) {
+            console.error('Error adding course:', error);
+        }
     }
 }
 
@@ -85,8 +95,13 @@ async function handleAddAssignment(event) {
     const dueDate = document.getElementById('due-date').value;
 
     if (course && name && dueDate) {
-        await window.electron.addAssignment(course, name, dueDate);
-        fetchData();
+        try {
+            await window.electron.addAssignment(course, name, dueDate);
+            fetchData();
+            console.log(`Assignment added: ${name} for course ${course}`);
+        } catch (error) {
+            console.error('Error adding assignment:', error);
+        }
     }
 }
 
@@ -111,10 +126,12 @@ function toggleTimer() {
         timeLeft = timerInput * 60; // Convert minutes to seconds
         timerDisplay.style.display = 'block';
         startTimer();
+        console.log(`Timer started for ${timerInput} minutes.`);
     } else {
         timerButton.textContent = 'Start Working';
         timerDisplay.style.display = 'none';
         stopTimer();
+        console.log('Timer stopped.');
     }
 }
 
@@ -123,6 +140,7 @@ function startTimer() {
         if (timeLeft <= 0) {
             stopTimer();
             alert("Time's up!");
+            console.log("Time's up!");
         } else {
             timeLeft--;
             updateTimerDisplay();
@@ -138,6 +156,7 @@ function stopTimer() {
         saveTimeToDatabase(updatedAssignment.id, workedSeconds).then(() => {
             updatedAssignment.workedSeconds += workedSeconds; // Add to existing time
             updateAssignmentList();
+            console.log(`Time logged: ${workedSeconds} seconds for assignment ${updatedAssignment.name}.`);
         });
     }
     timeLeft = null;
@@ -152,6 +171,7 @@ function updateTimerDisplay() {
 async function saveTimeToDatabase(assignmentId, additionalSeconds) {
     try {
         await window.electron.saveAssignmentTime(assignmentId, additionalSeconds);
+        console.log(`Time saved to database: ${additionalSeconds} seconds for assignment ID ${assignmentId}.`);
     } catch (error) {
         console.error('Failed to save time to database:', error);
     }
