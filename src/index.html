@@ -7,28 +7,47 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <h1>Assignment Tracker</h1>
-    <form id="course-form">
-        <input type="text" id="course-name" placeholder="Course Name" />
-        <button type="submit">Add Course</button>
-    </form>
-    <form id="project-form">
-        <select id="course-select">
-            <option value="">Select a Course</option>
+    <header>
+        <h1>Assignment Tracker</h1>
+    </header>
+
+    <main>
+        <!-- Add Course Form -->
+        <form id="course-form">
+            <input type="text" id="course-name" placeholder="Course Name" required>
+            <button type="submit">Add Course</button>
+        </form>
+
+        <!-- Add Assignment Form -->
+        <form id="project-form">
+            <select id="course-select" required>
+                <option value="">Select a Course</option>
+            </select>
+            <input type="text" id="assignment-name" placeholder="Assignment Name" required>
+            <input type="date" id="due-date" required>
+            <button type="submit">Add Assignment</button>
+        </form>
+
+        <!-- Filter and Assignment List -->
+        <select id="filter-select">
+            <option value="all">All Courses</option>
         </select>
-        <input type="text" id="assignment-name" placeholder="Assignment Name" />
-        <input type="date" id="due-date" />
-        <button type="submit">Add Assignment</button>
-    </form>
-    <select id="filter-select">
-        <option value="all">All Courses</option>
-    </select>
-    <ul id="assignments"></ul>
-    <div>
-        <input type="number" id="timer-input" min="1" value="25" />
-        <button id="timer-button">Start Working</button>
-        <div id="timer-display" style="display:none;">25:00</div>
+        <ul id="assignments"></ul>
+    </main>
+
+    <!-- Edit Popup Dialog -->
+    <div id="edit-popup" class="popup" style="display: none;">
+        <div class="popup-content">
+            <h2>Edit Due Date</h2>
+            <label for="popup-due-date">New Due Date:</label>
+            <input type="date" id="popup-due-date" />
+            <div class="popup-actions">
+                <button id="save-popup-button">Save</button>
+                <button id="cancel-popup-button">Cancel</button>
+            </div>
+        </div>
     </div>
+
     <script src="app.js"></script>
 </body>
 </html>
