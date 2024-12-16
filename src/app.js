@@ -182,6 +182,7 @@ function populateCourseList() {
     courses.forEach((course, index) => {
         const li = document.createElement('li');
         li.textContent = course;
+
         const deleteButton = document.createElement('button');
         deleteButton.textContent = 'Delete';
         deleteButton.addEventListener('click', () => deleteCourse(index));
@@ -197,9 +198,13 @@ async function deleteCourse(index) {
         try {
             const result = await window.electron.deleteCourse(courseToDelete);
             if (result) {
-                // Remove the course from the local array and refresh the popup UI
+                // Remove the course from the local array
                 courses.splice(index, 1);
-                populateCourseList(); // Refresh the course list in the popup
+
+                // Refresh both the Manage Courses popup and the dropdowns
+                populateCourseList(); // Update the "Manage Courses" list
+                updateCourseSelect(); // Update the "Select a Course" dropdown
+                updateFilterSelect(); // Update the "All Courses" dropdown
             } else {
                 console.error('Failed to delete course.');
             }
