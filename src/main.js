@@ -95,14 +95,37 @@ ipcMain.handle('editAssignment', async (event, assignmentId, newDueDate) => {
 
 ipcMain.handle('deleteCourse', async (event, courseName) => {
     try {
-        const courses = await loadCourses();
+        // Load courses from the database
+        const coursesData = await fs.promises.readFile(coursesPath, 'utf-8');
+        const courses = JSON.parse(coursesData);
+
+        // Filter out the deleted course
         const updatedCourses = courses.filter((course) => course !== courseName);
 
-        await saveCourses(updatedCourses);
-        return true;
+        // Save updated courses back to the database
+        await fs.promises.writeFile(coursesPath, JSON.stringify(updatedCourses, null, 2), 'utf-8');
+
+        // Load assignments from the database
+        const assignmentsData = await fs.promises.readFile(assignmentsPath, 'utf-8');
+        const assignments = JSON.parse(assignmentsData);
+
+        // Filter out assignments associated with the deleted course
+        const updatedAssignments = assignments.filter(
+            (assignment) => assignment.course !== courseName
+        );
+
+        // Save updated assignments back to the database
+        await fs.promises.writeFile(
+            assignmentsPath,
+            JSON.stringify(updatedAssignments, null, 2), 
+            'utf-8'
+        );
+
+        // Return updated data to the frontend
+        return { courses: updatedCourses, assignments: updatedAssignments };
     } catch (error) {
-        console.error('Error deleting course:', error);
-        return false;
+        console.error('Error deleting course and associated assignments:', error);
+        throw error; // Propagate error to the frontend
     }
 });
 

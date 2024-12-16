@@ -18,10 +18,22 @@ async function fetchData() {
 }
 
 function updateUI() {
-    updateCourseSelect();
-    updateFilterSelect();
-    updateAssignmentList();
-    resetAddAssignmentForm();
+    updateCourseSelect();    // Refresh course dropdowns
+    updateFilterSelect();    // Refresh "All Courses" dropdown
+    updateAssignmentList();  // Refresh assignments list
+    resetAssignmentForm();   // Reset the add-assignment form
+    populateCourseList();   // Refresh Manage Courses list
+}
+
+// Function to reset the add-assignment form fields
+function resetAssignmentForm() {
+    const courseInput = document.getElementById('assignment-course');
+    const nameInput = document.getElementById('assignment-name');
+    const dueDateInput = document.getElementById('assignment-due-date');
+
+    if (courseInput) courseInput.value = '';
+    if (nameInput) nameInput.value = '';
+    if (dueDateInput) dueDateInput.value = '';
 }
 
 function updateCourseSelect() {
@@ -196,19 +208,22 @@ function populateCourseList() {
 
 async function deleteCourse(index) {
     const courseToDelete = courses[index];
-    if (confirm(`Are you sure you want to delete "${courseToDelete}"?`)) {
+    if (confirm(`Are you sure you want to delete "${courseToDelete}" and all its assignments?`)) {
         try {
             const result = await window.electron.deleteCourse(courseToDelete);
             if (result) {
                 // Remove the course from the local array
                 courses.splice(index, 1);
 
-                // Refresh both the Manage Courses popup and the dropdowns
-                populateCourseList(); // Update the "Manage Courses" list
-                updateCourseSelect(); // Update the "Select a Course" dropdown
-                updateFilterSelect(); // Update the "All Courses" dropdown
+                // Remove assignments associated with the deleted course from the local array
+                assignments = assignments.filter(
+                    (assignment) => assignment.course !== courseToDelete
+                );
+
+                // Refresh all UI elements: course list, dropdowns, and assignments
+                updateUI(); // Refresh the UI immediately
             } else {
-                console.error('Failed to delete course.');
+                console.error('Failed to delete course and associated assignments.');
             }
         } catch (error) {
             console.error('Error deleting course:', error);

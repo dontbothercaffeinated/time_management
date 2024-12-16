@@ -4,7 +4,9 @@ contextBridge.exposeInMainWorld('electron', {
     // Course Methods
     fetchData: () => ipcRenderer.invoke('fetchData'),
     addCourse: (courseName) => ipcRenderer.invoke('addCourse', courseName),
-    deleteCourse: (courseName) => ipcRenderer.invoke('deleteCourse', courseName),
+    deleteCourse: async (courseName) => {
+        return await ipcRenderer.invoke('deleteCourse', courseName);
+    },
 
     // Assignment Methods
     addAssignment: (course, name, dueDate) =>
