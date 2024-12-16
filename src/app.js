@@ -27,13 +27,14 @@ function updateUI() {
 
 // Function to reset the add-assignment form fields
 function resetAssignmentForm() {
-    const courseInput = document.getElementById('assignment-course');
-    const nameInput = document.getElementById('assignment-name');
-    const dueDateInput = document.getElementById('assignment-due-date');
+    const courseInput = document.getElementById('course-select'); // Course dropdown
+    const nameInput = document.getElementById('assignment-name'); // Assignment name input
+    const dueDateInput = document.getElementById('due-date');     // Date input field
 
-    if (courseInput) courseInput.value = '';
-    if (nameInput) nameInput.value = '';
-    if (dueDateInput) dueDateInput.value = '';
+    // Reset inputs to default values
+    if (courseInput) courseInput.value = '';   // Reset the course dropdown
+    if (nameInput) nameInput.value = '';       // Reset the assignment name input
+    if (dueDateInput) dueDateInput.value = ''; // Reset the date selector to default (blank)
 }
 
 function updateCourseSelect() {
@@ -162,7 +163,7 @@ document.getElementById('project-form').addEventListener('submit', async (event)
         try {
             // Pass the selected date as-is (no UTC conversion)
             await window.electron.addAssignment(course, name, dueDate);
-            fetchData();
+            fetchData(); // Refresh the UI with the new assignment (includes reset)
         } catch (error) {
             console.error('Error adding assignment:', error);
         }
