@@ -69,15 +69,27 @@ ipcMain.handle('deleteAssignment', async (event, id) => {
     return true;
 });
 
-ipcMain.handle('editAssignment', async (event, id, newDueDate) => {
-    const assignments = JSON.parse(fs.readFileSync(assignmentsPath, 'utf8'));
-    const assignment = assignments.find((assignment) => assignment.id === id);
-    if (assignment) {
-        assignment.dueDate = newDueDate;
-        fs.writeFileSync(assignmentsPath, JSON.stringify(assignments, null, 2));
-        return true;
-    } else {
-        throw new Error('Assignment not found');
+ipcMain.handle('editAssignment', async (event, assignmentId, newDueDate) => {
+    try {
+        // Load assignments from the database
+        const data = await fs.promises.readFile(assignmentsPath, 'utf-8');
+        const assignments = JSON.parse(data);
+
+        // Update the assignment with the new due date
+        const updatedAssignments = assignments.map((assignment) => {
+            if (assignment.id === assignmentId) {
+                return { ...assignment, dueDate: newDueDate };
+            }
+            return assignment;
+        });
+
+        // Save the updated assignments back to the file
+        await fs.promises.writeFile(assignmentsPath, JSON.stringify(updatedAssignments, null, 2), 'utf-8');
+
+        return true; // Indicate success
+    } catch (error) {
+        console.error('Error updating assignment:', error);
+        return false; // Indicate failure
     }
 });
 

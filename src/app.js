@@ -100,14 +100,16 @@ async function saveEditPopup() {
     if (popupDueDate && editingAssignmentIndex !== null) {
         try {
             const assignment = assignments[editingAssignmentIndex];
+            const result = await window.electron.editAssignment(assignment.id, popupDueDate);
 
-            // Save the new due date without converting to UTC
-            await window.electron.editAssignment(assignment.id, popupDueDate);
-
-            // Close the popup and refresh data
-            popup.style.display = 'none';
-            editingAssignmentIndex = null;
-            fetchData();
+            if (result) {
+                // Close the popup and refresh the UI
+                popup.style.display = 'none';
+                editingAssignmentIndex = null;
+                fetchData(); // Refresh the assignments list
+            } else {
+                console.error('Failed to save edited due date.');
+            }
         } catch (error) {
             console.error('Error saving edited due date:', error);
         }

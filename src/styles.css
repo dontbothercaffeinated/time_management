@@ -141,7 +141,7 @@ form button:hover {
     border-radius: 5px;
 }
 
-/* Popup styles */
+/* General Popup Background Styling */
 .popup {
     position: fixed;
     top: 0;
@@ -152,25 +152,132 @@ form button:hover {
     display: flex;
     justify-content: center;
     align-items: center;
+    z-index: 1000;
 }
 
-.popup-content {
+/* Manage Courses Popup */
+#manage-courses-popup .popup-content {
     background: #fff;
     padding: 20px;
     border-radius: 5px;
-    width: 300px;
+    width: 350px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
     text-align: center;
 }
 
-.popup-actions {
-    margin-top: 10px;
-    display: flex;
-    justify-content: space-between;
+#manage-courses-popup h2 {
+    font-size: 1.5em;
+    margin-bottom: 15px;
 }
 
-.popup-actions button {
+#manage-courses-popup ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+#manage-courses-popup ul li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+#manage-courses-popup ul li button {
+    background-color: #d9534f; /* Red for delete */
+    color: white;
+    border: none;
     padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+#manage-courses-popup ul li button:hover {
+    opacity: 0.8;
+}
+
+#manage-courses-popup .popup-actions {
+    margin-top: 15px;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+#manage-courses-popup .popup-actions button {
+    padding: 8px 15px;
+    border: none;
+    border-radius: 5px;
+    color: white;
+    cursor: pointer;
+    font-size: 1em;
+}
+
+#manage-courses-popup .popup-actions button#close-manage-courses {
+    background-color: #f0ad4e; /* Orange */
+}
+
+#manage-courses-popup .popup-actions button:hover {
+    opacity: 0.8;
+}
+
+/* Edit Due Date Popup */
+#edit-popup .popup-content {
+    background: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    width: 320px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#edit-popup h2 {
+    font-size: 1.5em;
+    margin-bottom: 15px;
+}
+
+#edit-popup label {
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+#edit-popup input[type="date"] {
+    width: 100%;
+    padding: 8px;
+    font-size: 1em;
+    box-sizing: border-box;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    margin-bottom: 20px;
+}
+
+#edit-popup .popup-actions {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+#edit-popup .popup-actions button {
+    padding: 8px 15px;
+    border: none;
+    border-radius: 5px;
+    color: white;
+    cursor: pointer;
+    font-size: 1em;
+}
+
+#edit-popup .popup-actions button#save-popup-button {
+    background-color: #5cb85c; /* Green for save */
+}
+
+#edit-popup .popup-actions button#cancel-popup-button {
+    background-color: #d9534f; /* Red for cancel */
+}
+
+#edit-popup .popup-actions button:hover {
+    opacity: 0.8;
 }
 
 /* Manage Courses Button */
@@ -186,60 +293,6 @@ form button:hover {
 }
 
 #manage-courses-button:hover {
-    opacity: 0.8;
-}
-
-/* Popup Styling */
-.popup {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background-color: white;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    z-index: 1000;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 20px;
-    min-width: 300px;
-}
-
-.popup-content {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-.popup-content h2 {
-    margin-bottom: 20px;
-}
-
-.popup-content ul {
-    list-style-type: none;
-    padding: 0;
-    width: 100%;
-}
-
-.popup-content ul li {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin: 5px 0;
-}
-
-.popup-content button {
-    padding: 5px 10px;
-    margin-left: 10px;
-    background-color: #d9534f; /* Red for delete */
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-}
-
-.popup-content button:hover {
     opacity: 0.8;
 }
 
