@@ -1,10 +1,15 @@
 const { contextBridge, ipcRenderer } = require('electron');
 
 contextBridge.exposeInMainWorld('electron', {
+    deleteCourse: (courseName) => ipcRenderer.invoke('deleteCourse', courseName),
     fetchData: () => ipcRenderer.invoke('fetchData'),
     addCourse: (courseName) => ipcRenderer.invoke('addCourse', courseName),
     addAssignment: (course, name, dueDate) => ipcRenderer.invoke('addAssignment', course, name, dueDate),
-    deleteAssignment: (id) => ipcRenderer.invoke('deleteAssignment', id),
-    editAssignment: (id, newDueDate) => ipcRenderer.invoke('editAssignment', id, newDueDate),
-    saveAssignmentTime: (id, additionalSeconds) => ipcRenderer.invoke('saveAssignmentTime', id, additionalSeconds),
+    deleteAssignment: (assignmentId) => ipcRenderer.invoke('deleteAssignment', assignmentId),
+});
+
+contextBridge.exposeInMainWorld('electron', {
+    deleteCourse: async (courseName) => {
+        return await ipcRenderer.invoke('deleteCourse', courseName);
+    },
 });

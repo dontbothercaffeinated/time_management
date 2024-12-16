@@ -9,6 +9,8 @@ async function fetchData() {
         const response = await window.electron.fetchData();
         courses = response.courses;
         assignments = response.assignments;
+
+        // Update the UI
         updateUI();
     } catch (error) {
         console.error('Error fetching data:', error);
@@ -156,5 +158,59 @@ document.getElementById('project-form').addEventListener('submit', async (event)
 document.getElementById('filter-select').addEventListener('change', (event) => {
     updateAssignmentList(event.target.value);
 });
+
+// Attach event listeners for the Manage Courses button
+document.getElementById('manage-courses-button').addEventListener('click', () => {
+    showManageCoursesPopup();
+});
+
+function showManageCoursesPopup() {
+    const popup = document.getElementById('manage-courses-popup');
+    populateCourseList(); // Populate courses when opening
+    popup.style.display = 'flex';
+}
+
+function hideManageCoursesPopup() {
+    const popup = document.getElementById('manage-courses-popup');
+    popup.style.display = 'none';
+}
+
+function populateCourseList() {
+    const courseList = document.getElementById('course-list');
+    courseList.innerHTML = ''; // Clear the current list
+
+    courses.forEach((course, index) => {
+        const li = document.createElement('li');
+        li.textContent = course;
+        const deleteButton = document.createElement('button');
+        deleteButton.textContent = 'Delete';
+        deleteButton.addEventListener('click', () => deleteCourse(index));
+
+        li.appendChild(deleteButton);
+        courseList.appendChild(li);
+    });
+}
+
+async function deleteCourse(index) {
+    const courseToDelete = courses[index];
+    if (confirm(`Are you sure you want to delete "${courseToDelete}"?`)) {
+        try {
+            const result = await window.electron.deleteCourse(courseToDelete);
+            if (result) {
+                // Remove the course from the local array and refresh the popup UI
+                courses.splice(index, 1);
+                populateCourseList(); // Refresh the course list in the popup
+            } else {
+                console.error('Failed to delete course.');
+            }
+        } catch (error) {
+            console.error('Error deleting course:', error);
+        }
+    }
+}
+
+// Attach event listener for closing the Manage Courses popup
+document.getElementById('close-manage-courses').addEventListener('click', hideManageCoursesPopup);
+
 
 fetchData();

@@ -6,6 +6,27 @@ const fs = require('fs');
 const assignmentsPath = path.join(__dirname, '..', 'db', 'assignments.json');
 const coursesPath = path.join(__dirname, '..', 'db', 'courses.json');
 
+// Function to load courses from the JSON database
+async function loadCourses() {
+    try {
+        const data = await fs.promises.readFile(coursesPath, 'utf-8');
+        return JSON.parse(data);
+    } catch (error) {
+        console.error('Error loading courses:', error);
+        return [];
+    }
+}
+
+// Function to save courses to the JSON database
+async function saveCourses(courses) {
+    try {
+        await fs.promises.writeFile(coursesPath, JSON.stringify(courses, null, 2), 'utf-8');
+    } catch (error) {
+        console.error('Error saving courses:', error);
+        throw error;
+    }
+}
+
 function createWindow() {
     const mainWindow = new BrowserWindow({
         width: 800,
@@ -59,6 +80,20 @@ ipcMain.handle('editAssignment', async (event, id, newDueDate) => {
         throw new Error('Assignment not found');
     }
 });
+
+ipcMain.handle('deleteCourse', async (event, courseName) => {
+    try {
+        const courses = await loadCourses();
+        const updatedCourses = courses.filter((course) => course !== courseName);
+
+        await saveCourses(updatedCourses);
+        return true;
+    } catch (error) {
+        console.error('Error deleting course:', error);
+        return false;
+    }
+});
+
 
 app.whenReady().then(() => {
     createWindow();

@@ -16,6 +16,7 @@
         <form id="course-form">
             <input type="text" id="course-name" placeholder="Course Name" required>
             <button type="submit">Add Course</button>
+            <button type="button" id="manage-courses-button">Manage Courses</button>
         </form>
 
         <!-- Add Assignment Form -->
@@ -27,6 +28,18 @@
             <input type="date" id="due-date" required>
             <button type="submit">Add Assignment</button>
         </form>
+
+        <!-- Manage Courses Popup -->
+        <div id="manage-courses-popup" class="popup" style="display: none;">
+            <div class="popup-content">
+                <h2>Manage Courses</h2>
+                <ul id="course-list">
+                    <!-- Courses will be dynamically added here -->
+                </ul>
+                <button id="close-manage-courses">Close</button>
+            </div>
+        </div>
+
 
         <!-- Filter and Assignment List -->
         <select id="filter-select">
