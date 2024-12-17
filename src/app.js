@@ -73,9 +73,12 @@ function updateAssignmentList(filter = 'all') {
         li.classList.add('assignment-item');
         li.innerHTML = `
             <input type="radio" name="selected-assignment" value="${assignment.id}" id="assignment-${assignment.id}" />
-            <label for="assignment-${assignment.id}">
-                ${assignment.course} - ${assignment.name} - Due: ${assignment.dueDate} - Worked: ${(assignment.workedSeconds / 60).toFixed(2)} mins
-            </label>
+            <div class="assignment-row">
+                <div class="variable-box">${assignment.course}</div>
+                <div class="variable-box">${assignment.name}</div>
+                <div class="variable-box">${assignment.dueDate}</div>
+                <div class="variable-box">${(assignment.workedSeconds / 60).toFixed(2)} mins</div>
+            </div>
             <button class="edit-button">Edit</button>
             <button class="delete-button">Delete</button>
         `;
