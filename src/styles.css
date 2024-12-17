@@ -70,43 +70,6 @@ form button:hover {
     color: #555;
 }
 
-/* Timer Container - Centering with Flexbox */
-#timer-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    margin-top: 30px;
-    gap: 15px; /* Adds spacing between the input and button */
-}
-
-#timer-input {
-    width: 80px;
-    text-align: center;
-    padding: 8px;
-    font-size: 18px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    background-color: #fff;
-}
-
-#timer-button {
-    padding: 12px 24px;
-    font-size: 18px;
-    background-color: #4CAF50;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    transition: background-color 0.3s ease;
-}
-
-#timer-button:hover {
-    background-color: #45a049;
-}
-
 /* Priority Visualization */
 .priority-bar {
     position: relative;
@@ -297,34 +260,70 @@ form button:hover {
 }
 
 #work-timer {
-    margin-top: 20px;
+    margin: 20px auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    max-width: 600px;
+    text-align: center;
 }
 
 #work-timer label {
+    font-weight: bold;
     font-size: 1rem;
-    margin-right: 10px;
 }
 
 #work-duration {
-    width: 50px;
-    margin-right: 10px;
+    width: 60px;
+    height: 20px; /* Matches button height */
+    padding: 5px;
+    font-size: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 5px; /* Matches button's border radius */
+    text-align: center;
+    line-height: 1;
+    -moz-appearance: textfield; /* Firefox */
+    appearance: textfield; /* Standard */
+}
+
+#work-duration::-webkit-outer-spin-button,
+#work-duration::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
 }
 
 #start-stop-button {
-    padding: 5px 10px;
-    background-color: #4caf50;
-    color: white;
+    padding: 5px 12px;
+    height: 38px; /* Ensures consistent height */
+    font-size: 1rem;
+    background-color: #28a745;
+    color: #ffffff;
     border: none;
+    border-radius: 5px; /* Rounded corners */
     cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+#start-stop-button:hover {
+    background-color: #218838;
 }
 
 #start-stop-button.stop {
-    background-color: #f44336;
+    background-color: #dc3545;
+}
+
+#start-stop-button.stop:hover {
+    background-color: #c82333;
 }
 
 #countdown-timer {
-    margin-top: 10px;
-    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin-left: 15px;
+    color: #007bff;
 }
 
 /* Responsive Design */
