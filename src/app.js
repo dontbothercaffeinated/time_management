@@ -2,6 +2,8 @@ let courses = [];
 let assignments = [];
 let selectedAssignmentIndex = 0;
 let editingAssignmentIndex = null; // Track the assignment being edited
+let timerInterval = null;
+let selectedAssignmentId = null;
 
 // Fetch data from the backend
 async function fetchData() {
@@ -70,7 +72,10 @@ function updateAssignmentList(filter = 'all') {
         const li = document.createElement('li');
         li.classList.add('assignment-item');
         li.innerHTML = `
-            <span>${assignment.course} - ${assignment.name} - Due: ${assignment.dueDate} - Worked: ${(assignment.workedSeconds / 60).toFixed(2)} mins</span>
+            <input type="radio" name="selected-assignment" value="${assignment.id}" id="assignment-${assignment.id}" />
+            <label for="assignment-${assignment.id}">
+                ${assignment.course} - ${assignment.name} - Due: ${assignment.dueDate} - Worked: ${(assignment.workedSeconds / 60).toFixed(2)} mins
+            </label>
             <button class="edit-button">Edit</button>
             <button class="delete-button">Delete</button>
         `;
@@ -78,7 +83,79 @@ function updateAssignmentList(filter = 'all') {
 
         li.querySelector('.edit-button').addEventListener('click', () => showEditPopup(index));
         li.querySelector('.delete-button').addEventListener('click', () => deleteAssignment(index));
+        // Add event listener for radio button selection
+        li.querySelector(`input[type="radio"]`).addEventListener('change', (event) => {
+            selectedAssignmentId = parseInt(event.target.value, 10);
+        });
     });
+}
+
+function handleStartStopButton() {
+    const button = document.getElementById('start-stop-button');
+    const workDuration = parseInt(document.getElementById('work-duration').value, 10) * 60; // Convert to seconds
+    const countdownTimer = document.getElementById('countdown-timer');
+    const timeRemaining = document.getElementById('time-remaining');
+
+    if (button.textContent === 'Start Working') {
+        if (selectedAssignmentId === null) {
+            alert('Please select an assignment to work on.');
+            return;
+        }
+
+        // Start timer
+        let remainingTime = workDuration;
+        countdownTimer.style.display = 'block';
+        timeRemaining.textContent = formatTime(remainingTime);
+
+        timerInterval = setInterval(() => {
+            remainingTime -= 1;
+            timeRemaining.textContent = formatTime(remainingTime);
+
+            if (remainingTime <= 0) {
+                clearInterval(timerInterval);
+                alert('Time is up!');
+                logWorkTime(workDuration); // Log the total time worked
+                resetTimer();
+            }
+        }, 1000);
+
+        button.textContent = 'Stop Working';
+        button.classList.add('stop');
+    } else {
+        // Stop timer
+        clearInterval(timerInterval);
+        logWorkTime(workDuration - parseInt(timeRemaining.textContent.split(':').reduce((acc, time) => (60 * acc) + +time), 10));
+        resetTimer();
+    }
+}
+
+function resetTimer() {
+    document.getElementById('start-stop-button').textContent = 'Start Working';
+    document.getElementById('start-stop-button').classList.remove('stop');
+    document.getElementById('countdown-timer').style.display = 'none';
+}
+
+function formatTime(seconds) {
+    const minutes = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+}
+
+async function logWorkTime(secondsWorked) {
+    if (selectedAssignmentId === null) return;
+
+    console.log('Logging work time for assignment ID:', selectedAssignmentId); // Debugging
+
+    try {
+        const response = await window.electron.logTime(selectedAssignmentId, secondsWorked);
+        if (response.success) {
+            fetchData(); // Refresh data to reflect changes
+        } else {
+            console.error('Failed to log work time:', response.error);
+        }
+    } catch (error) {
+        console.error('Error logging work time:', error);
+    }
 }
 
 async function deleteAssignment(index) {
@@ -234,6 +311,8 @@ async function deleteCourse(index) {
 
 // Attach event listener for closing the Manage Courses popup
 document.getElementById('close-manage-courses').addEventListener('click', hideManageCoursesPopup);
+// Add Event Listener for the Start/Stop Button
+document.getElementById('start-stop-button').addEventListener('click', handleStartStopButton);
 
 
 fetchData();

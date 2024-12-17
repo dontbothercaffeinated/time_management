@@ -27,6 +27,24 @@ async function saveCourses(courses) {
     }
 }
 
+async function logTime(assignmentId, secondsWorked) {
+    const assignmentsPath = path.resolve(__dirname, '../db/assignments.json');
+
+    try {
+        const data = JSON.parse(fs.readFileSync(assignmentsPath, 'utf-8'));
+        const assignment = data.find((a) => a.id === assignmentId);
+        if (assignment) {
+            assignment.workedSeconds += secondsWorked;
+            fs.writeFileSync(assignmentsPath, JSON.stringify(data, null, 2));
+            return { success: true };
+        }
+        return { success: false, error: 'Assignment not found' };
+    } catch (error) {
+        console.error('Error logging time:', error);
+        return { success: false, error };
+    }
+}
+
 function createWindow() {
     const mainWindow = new BrowserWindow({
         width: 800,
@@ -54,12 +72,35 @@ ipcMain.handle('addCourse', async (event, courseName) => {
     return true;
 });
 
+// Function to add a new assignment with numeric ID
 ipcMain.handle('addAssignment', async (event, course, name, dueDate) => {
-    const assignments = JSON.parse(fs.readFileSync(assignmentsPath, 'utf8'));
-    const id = `assignment-${Date.now()}`;
-    assignments.push({ id, course, name, dueDate, workedSeconds: 0, priority: 0 });
-    fs.writeFileSync(assignmentsPath, JSON.stringify(assignments, null, 2));
-    return true;
+    try {
+        const assignments = fs.existsSync(assignmentsPath)
+            ? JSON.parse(fs.readFileSync(assignmentsPath, 'utf-8'))
+            : [];
+
+        // Generate a unique numeric ID
+        const newId = assignments.length > 0 
+            ? Math.max(...assignments.map(a => a.id || 0)) + 1 
+            : 1;
+
+        // New assignment object
+        const newAssignment = {
+            id: newId, // Numeric ID
+            course,
+            name,
+            dueDate,
+            workedSeconds: 0 // Default worked time
+        };
+
+        // Add the new assignment and save
+        assignments.push(newAssignment);
+        fs.writeFileSync(assignmentsPath, JSON.stringify(assignments, null, 2));
+        return { success: true, assignment: newAssignment };
+    } catch (error) {
+        console.error('Error adding assignment:', error);
+        return { success: false, error };
+    }
 });
 
 ipcMain.handle('deleteAssignment', async (event, id) => {
@@ -129,6 +170,10 @@ ipcMain.handle('deleteCourse', async (event, courseName) => {
     }
 });
 
+// Handle log time requests from renderer
+ipcMain.handle('log-time', async (event, assignmentId, secondsWorked) => {
+    return await logTime(assignmentId, secondsWorked);
+});
 
 app.whenReady().then(() => {
     createWindow();

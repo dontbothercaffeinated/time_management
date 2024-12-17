@@ -296,6 +296,37 @@ form button:hover {
     opacity: 0.8;
 }
 
+#work-timer {
+    margin-top: 20px;
+}
+
+#work-timer label {
+    font-size: 1rem;
+    margin-right: 10px;
+}
+
+#work-duration {
+    width: 50px;
+    margin-right: 10px;
+}
+
+#start-stop-button {
+    padding: 5px 10px;
+    background-color: #4caf50;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+#start-stop-button.stop {
+    background-color: #f44336;
+}
+
+#countdown-timer {
+    margin-top: 10px;
+    font-size: 1rem;
+}
+
 /* Responsive Design */
 @media (max-width: 600px) {
     form {

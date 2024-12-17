@@ -15,4 +15,8 @@ contextBridge.exposeInMainWorld('electron', {
         ipcRenderer.invoke('deleteAssignment', assignmentId),
     editAssignment: (assignmentId, newDueDate) =>
         ipcRenderer.invoke('editAssignment', assignmentId, newDueDate),
+
+    
+    logTime: (assignmentId, secondsWorked) =>
+        ipcRenderer.invoke('log-time', assignmentId, secondsWorked),
 });
