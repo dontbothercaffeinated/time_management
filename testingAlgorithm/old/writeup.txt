@@ -1,0 +1,38 @@
+VERIFYING STANDARD DEVIATION CALCULATIONS
+
+ID	ID
+1	2120
+2	21
+3	300
+4	123
+5	500
+
+- THE MEAN : outcome is the same
+
+JS (zscore-calculation.js): 612.8
+GOOGLE SHEETS (average function): 612.8
+
+- STANDARD DEVIATION : outcome is the same, with normal differences with rounding and total places shown
+
+JS (zscore-calculation.js): 771.0189102739309
+GOOGLE SHEETS (stdevp function): 771.0189103
+
+- Z-SCORES : outcome is the same, aside from rounding that is behaving as it should
+
+JS (zscore-calculation.js):
+
+ID  zScore
+1   1.95
+2   -0.77
+3   -0.41
+4   -0.64
+5   -0.15
+
+GOOGLE SHEETS ((B2-$C$8)/$D$8):
+
+ID	ID	Z-scores
+1	2120	1.954815868
+2	21	-0.7675557527
+3	300	-0.4056969237
+4	123	-0.6352632776
+5	500	-0.1462999137

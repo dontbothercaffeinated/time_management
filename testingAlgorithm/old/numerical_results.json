@@ -1,0 +1,8 @@
+[
+    {
+        "id": 1,
+        "course": "Accounting 1",
+        "name": "Assignment 1",
+        "dueDate": "2025-02-17",
+        "numerator": -Infinity,
+        "proportional_time_contribution": 

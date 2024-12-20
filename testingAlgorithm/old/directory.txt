@@ -1,0 +1,4 @@
+filename    purpose
+writeup.txt contains the full write up that walks through the tests that were done to ensure each piece of the code that makes up the algorithm is working as expected
+dbcontents.txt  contains the database contents in db/assignments.json that existed at the start and throughout testing
+zscore-calculation.js   mean, standard deviation, and z-score calculated using db/assignments.json data

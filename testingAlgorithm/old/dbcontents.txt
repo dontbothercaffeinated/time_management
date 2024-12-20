@@ -1,0 +1,37 @@
+[
+  {
+    "id": 1,
+    "course": "accounting 1",
+    "name": "midterm 1",
+    "dueDate": "2024-12-27",
+    "workedSeconds": 2120
+  },
+  {
+    "id": 2,
+    "course": "accounting 1",
+    "name": "midterm 2",
+    "dueDate": "2025-01-31",
+    "workedSeconds": 21
+  },
+  {
+    "id": 3,
+    "course": "accounting 1",
+    "name": "midterm 3",
+    "dueDate": "2025-02-27",
+    "workedSeconds": 300
+  },
+  {
+    "id": 4,
+    "course": "accounting 2",
+    "name": "midterm 1",
+    "dueDate": "2025-01-08",
+    "workedSeconds": 123
+  },
+  {
+    "id": 5,
+    "course": "accounting 2",
+    "name": "midterm 2",
+    "dueDate": "2025-03-13",
+    "workedSeconds": 500
+  }
+]
