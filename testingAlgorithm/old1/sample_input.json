@@ -1,0 +1,12 @@
+{
+    "t0": 1697384400,  
+    "t1": 1697388000,  
+    "D": 1697400000,   
+    "Tmax": 10,        
+    "k": 1,            
+    "muDueTimes": 1697395200, 
+    "sigmaDueTimes": 3600,    
+    "muLoggedTimes": 5000,    
+    "sigmaLoggedTimes": 1000, 
+    "loggedTime": 5500        
+}
