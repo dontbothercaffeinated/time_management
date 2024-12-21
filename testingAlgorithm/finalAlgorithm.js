@@ -1,7 +1,8 @@
 const fs = require('fs');
 const userVariables = require('./user_variables_algorithm'); // Import user-configurable variables specific for this algorithm file // variables that could be modified by an advanced user in ./user_variables_algorithm
 const systemVariables = require('./system_variables_algorithm'); // Import system variables specific for this algorithm file // variables that should not be modified by any user (set programmatically)
-
+// this can be deleted after testing completed
+const readlineSync = require('readline-sync');
 function trapezoidalRule(t0, t1, params) {
     const {
         k,
@@ -115,5 +116,9 @@ assignments.forEach((assignment) => {
 
     const result = trapezoidalRule(t0, t1, params);
     console.log("Approximation of Integral:", result);
+
+    // this can be deleted after testing completed
+    // Blocking behavior: Wait for user to press Enter
+    readlineSync.question('Press Enter to continue...');
 
 });
