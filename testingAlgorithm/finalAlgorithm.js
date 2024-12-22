@@ -3,18 +3,24 @@ const userVariables = require('./user_variables_algorithm');
 const systemVariables = require('./system_variables_algorithm');
 const readlineSync = require('readline-sync');
 
+// File for logging
+const logFile = 'assignment_logs.json';
+
 // Helper function for detailed logging to file
-function logToFile(data, filename = 'assignment_logs.json') {
-    fs.writeFileSync(filename, JSON.stringify(data, null, 2));
+function appendToFile(data, filename) {
+    fs.appendFileSync(filename, JSON.stringify(data, null, 2) + '\n');
 }
 
 // Helper function for console logging with timestamps
 function logWithTimestamp(message, data = null) {
     const timestamp = new Date().toISOString();
-    console.log(`[${timestamp}] ${message}`);
+    const logMessage = `[${timestamp}] ${message}`;
+    console.log(logMessage);
     if (data !== null) {
         console.log(JSON.stringify(data, null, 2));
     }
+    // Write to the log file
+    appendToFile({ timestamp, message, data }, logFile);
 }
 
 // Trapezoidal rule implementation
@@ -45,9 +51,6 @@ function trapezoidalRule(t0, t1, params, allAssignments) {
             totalFT,
         });
     }
-
-    // Write detailed logs to file
-    logToFile(detailedLogs);
 
     return sum;
 }
@@ -141,9 +144,6 @@ assignments.forEach((assignment, index) => {
         t1,
     });    
 
-    // Clear previous detailed logs by overwriting the file
-    fs.writeFileSync('assignment_logs.json', '[]');
-
 
     // Start the timer
     const startTime = Date.now();
@@ -169,8 +169,6 @@ assignments.forEach((assignment, index) => {
     // Log final result to console
     logWithTimestamp(`Finished processing assignment ${index + 1}`, { result });
     logWithTimestamp(`Time taken for assignment ${index + 1}:`, { elapsedTime: `${elapsedTime.toFixed(2)} seconds` });
-
-    readlineSync.question('Press Enter to continue...');
 });
 
 // At the end, log verification of the total sum
