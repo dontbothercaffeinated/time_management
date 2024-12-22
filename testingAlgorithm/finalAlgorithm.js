@@ -1,124 +1,139 @@
 const fs = require('fs');
-const userVariables = require('./user_variables_algorithm'); // Import user-configurable variables specific for this algorithm file // variables that could be modified by an advanced user in ./user_variables_algorithm
-const systemVariables = require('./system_variables_algorithm'); // Import system variables specific for this algorithm file // variables that should not be modified by any user (set programmatically)
-// this can be deleted after testing completed
+const userVariables = require('./user_variables_algorithm');
+const systemVariables = require('./system_variables_algorithm');
 const readlineSync = require('readline-sync');
-function trapezoidalRule(t0, t1, params) {
-    const {
-        k,
-        Tmax,
-        D,
-        muDueTimes,
-        sigmaDueTimes,
-        muLoggedTimes,
-        sigmaLoggedTimes,
-        loggedTime,
-    } = params;
 
-    const deltaT = 1; // Step size in seconds (Unix timestamp resolution)
+// Helper function for detailed logging to file
+function logToFile(data, filename = 'assignment_logs.json') {
+    fs.writeFileSync(filename, JSON.stringify(data, null, 2));
+}
+
+// Helper function for console logging with timestamps
+function logWithTimestamp(message, data = null) {
+    const timestamp = new Date().toISOString();
+    console.log(`[${timestamp}] ${message}`);
+    if (data !== null) {
+        console.log(JSON.stringify(data, null, 2));
+    }
+}
+
+// Trapezoidal rule implementation
+function trapezoidalRule(t0, t1, params) {
+    const { k, Tmax, D, muDueTimes, sigmaDueTimes, muLoggedTimes, sigmaLoggedTimes, loggedTime } = params;
+
+    const deltaT = 1; // Step size in seconds
     let sum = 0;
+    const detailedLogs = []; // Collect logs for each slice
 
     for (let t = t0; t < t1; t += deltaT) {
         const f_t = priorityFunction(t, params);
         const f_tNext = priorityFunction(t + deltaT, params);
-
-        // Trapezoidal rule formula
         sum += (f_t + f_tNext) / 2 * deltaT;
+
+        // Add intermediate calculations to detailed logs
+        detailedLogs.push({
+            t,
+            f_t,
+            f_tNext,
+            partialSum: sum,
+        });
     }
+
+    // Write detailed logs to file
+    logToFile(detailedLogs);
 
     return sum;
 }
 
+// Priority function
 function priorityFunction(t, params) {
-    const {
-        k,
-        Tmax,
-        D,
-        muDueTimes,
-        sigmaDueTimes,
-        muLoggedTimes,
-        sigmaLoggedTimes,
-        loggedTime,
-    } = params;
+    const { k, Tmax, D, muDueTimes, sigmaDueTimes, muLoggedTimes, sigmaLoggedTimes, loggedTime } = params;
 
-    // Exponential term
     const expTerm = (1 - Math.exp(-k * (Tmax - (D - t)) / Tmax)) / (1 - Math.exp(-k));
-
-    // First term of priority function
     const firstTerm = (0.5 + 0.5 * expTerm) * ((D - t) - muDueTimes) / sigmaDueTimes;
-
-    // Second term of priority function
     const secondTerm = (0.5 - 0.5 * expTerm) * (loggedTime - muLoggedTimes) / sigmaLoggedTimes;
+    const result = firstTerm + secondTerm;
 
-    return firstTerm + secondTerm;
+    return result;
 }
 
-function calculateMeanForKey(assignments, key) {
-    const values = assignments.map((assignment) => assignment[key]);
-    return values.reduce((sum, value) => sum + value, 0) / values.length;
+// Calculate mean
+function calculateMeanForKey(assignments, key, currentTime) {
+    if (key === "dueDate") {
+        const secondsUntilDue = assignments.map((assignment) => assignment.dueDate - currentTime);
+        return secondsUntilDue.reduce((sum, value) => sum + value, 0) / secondsUntilDue.length;
+    } else {
+        const values = assignments.map((assignment) => assignment[key]);
+        return values.reduce((sum, value) => sum + value, 0) / values.length;
+    }
 }
 
-function calculateStandardDeviationForKey(assignments, key, mean) {
-    const values = assignments.map((assignment) => assignment[key]);
-    const squaredDifferences = values.map((value) => Math.pow(value - mean, 2));
-    const variance = squaredDifferences.reduce((sum, value) => sum + value, 0) / values.length;
-    return Math.sqrt(variance);
+// Calculate standard deviation
+function calculateStandardDeviationForKey(assignments, key, mean, currentTime) {
+    if (key === "dueDate") {
+        const secondsUntilDue = assignments.map((assignment) => assignment.dueDate - currentTime);
+        const squaredDifferences = secondsUntilDue.map((value) => Math.pow(value - mean, 2));
+        const variance = squaredDifferences.reduce((sum, value) => sum + value, 0) / secondsUntilDue.length;
+        return Math.sqrt(variance);
+    } else {
+        const values = assignments.map((assignment) => assignment[key]);
+        const squaredDifferences = values.map((value) => Math.pow(value - mean, 2));
+        const variance = squaredDifferences.reduce((sum, value) => sum + value, 0) / values.length;
+        return Math.sqrt(variance);
+    }
 }
 
+// Get current Unix time
 function getCurrentUnixTime() {
     return Math.floor(Date.now() / 1000); // Converts milliseconds to seconds
 }
 
-// Calculate T_max
-function calculateTmax(assignments,minTmax) {
+// Calculate Tmax
+function calculateTmax(assignments, minTmax) {
     const currentTime = getCurrentUnixTime();
-
-    // Calculate the total seconds until due date for each assignment
-    const secondsUntilDue = assignments.map(assignment => assignment.dueDate - currentTime);
-
-    // Calculate the mean of the total seconds until due date
+    const secondsUntilDue = assignments.map((assignment) => assignment.dueDate - currentTime);
     const meanSecondsUntilDue = secondsUntilDue.reduce((sum, value) => sum + value, 0) / secondsUntilDue.length;
-
-    // Return the greater of 10 days or the mean of seconds until due date
     return Math.max(minTmax, meanSecondsUntilDue);
 }
 
-// Read assignments from the database
+// Main script execution
 const rawData = fs.readFileSync('./test_data.json', 'utf8');
 const assignments = JSON.parse(rawData);
 
-const meanDueDate = calculateMeanForKey(assignments, "dueDate");
-const standardDeviationDueDates = calculateStandardDeviationForKey(assignments, "dueDate", meanDueDate);
-const meanWorkedSeconds = calculateMeanForKey(assignments, "workedSeconds");
-const standardDeviationWorkedSeconds = calculateStandardDeviationForKey(assignments, "workedSeconds", meanWorkedSeconds);
+const tMaxVal = calculateTmax(assignments, userVariables.minimumTmax);
+const t0 = systemVariables.t0;
+const t1 = getCurrentUnixTime();
 
-// Compute Tmax
-const tMaxVal = calculateTmax(assignments,userVariables.minimumTmax);
+const meanDueDate = calculateMeanForKey(assignments, "dueDate", t1);
+const standardDeviationDueDates = calculateStandardDeviationForKey(assignments, "dueDate", meanDueDate, t1);
+const meanWorkedSeconds = calculateMeanForKey(assignments, "workedSeconds", t1);
+const standardDeviationWorkedSeconds = calculateStandardDeviationForKey(assignments, "workedSeconds", meanWorkedSeconds, t1);
 
-const currentTimeInUnix = getCurrentUnixTime();
+assignments.forEach((assignment, index) => {
+    logWithTimestamp(`Processing assignment ${index + 1}`, assignment);
 
-const t0 = systemVariables.t0; // Unix timestamp for start time
-const t1 = currentTimeInUnix; // Unix timestamp for end time
-
-assignments.forEach((assignment) => {
-
-    // Example Usage
     const params = {
-        k: userVariables.k, // Exponential weighting factor
-        Tmax: tMaxVal, // number of seconds away from due date where weight starts shifting towards time until due priority // used to make sure approaching due dates overpower time worked
-        D: assignment.dueDate, // Due date in Unix timestamp
-        muDueTimes: meanDueDate, // Mean of due dates
-        sigmaDueTimes: standardDeviationDueDates, // Standard deviation of due dates
-        muLoggedTimes: meanWorkedSeconds, // Mean logged time
-        sigmaLoggedTimes: standardDeviationWorkedSeconds, // Standard deviation of logged time
-        loggedTime: assignment.workedSeconds, // Logged time
+        k: userVariables.k,
+        Tmax: tMaxVal,
+        D: assignment.dueDate,
+        muDueTimes: meanDueDate,
+        sigmaDueTimes: standardDeviationDueDates,
+        muLoggedTimes: meanWorkedSeconds,
+        sigmaLoggedTimes: standardDeviationWorkedSeconds,
+        loggedTime: assignment.workedSeconds,
     };
 
+    // Log all parameters for the current assignment
+    logWithTimestamp(`Parameters for assignment ${index + 1}`, params);
+
+    // Clear previous detailed logs by overwriting the file
+    fs.writeFileSync('assignment_logs.json', '[]');
+
+    // Perform trapezoidal rule calculation and log detailed steps to file
     const result = trapezoidalRule(t0, t1, params);
-    console.log("Approximation of Integral:", result);
 
-    // this can be deleted after testing completed
-    // Blocking behavior: Wait for user to press Enter
+    // Log final result to console
+    logWithTimestamp(`Finished processing assignment ${index + 1}`, { result });
+
     readlineSync.question('Press Enter to continue...');
-
 });
