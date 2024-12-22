@@ -124,7 +124,11 @@ assignments.forEach((assignment, index) => {
     };
 
     // Log all parameters for the current assignment
-    logWithTimestamp(`Parameters for assignment ${index + 1}`, params);
+    logWithTimestamp(`Parameters for assignment ${index + 1}`, {
+        ...params,
+        t0,
+        t1,
+    });    
 
     // Clear previous detailed logs by overwriting the file
     fs.writeFileSync('assignment_logs.json', '[]');
