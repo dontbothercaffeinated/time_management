@@ -25,21 +25,24 @@ function logWithTimestamp(message, data = null) {
 
 // Trapezoidal rule implementation
 function trapezoidalRule(t0, t1, params, allAssignments) {
-    const { k, Tmax, D, muDueTimes, sigmaDueTimes, muLoggedTimes, sigmaLoggedTimes, loggedTime } = params;
-
     const deltaT = 1; // Step size in seconds
     let sum = 0;
     const detailedLogs = []; // Collect logs for each slice
 
     for (let t = t0; t < t1; t += deltaT) {
-        // Calculate total f(t) sum across all assignments
-        const totalFT = allAssignments.reduce((total, assignmentParams) => {
-            return total + priorityFunction(t, assignmentParams, 1); // Use unnormalized f(t)
-        }, 0);
+        // Calculate adjusted f(t) values for all assignments
+        const adjustedFTs = allAssignments.map((assignment) => {
+            return priorityFunction(t, assignment, allAssignments);
+        });
 
-        // Calculate normalized f(t) for this assignment
-        const f_t = priorityFunction(t, params, totalFT);
-        const f_tNext = priorityFunction(t + deltaT, params, totalFT);
+        // Calculate total adjusted f(t) sum across all assignments
+        const totalAdjustedFT = adjustedFTs.reduce((total, value) => total + value, 0);
+
+        // Calculate normalized f'(t) for this assignment
+        const f_t = priorityFunction(t, params, allAssignments) / totalAdjustedFT;
+        const f_tNext = priorityFunction(t + deltaT, params, allAssignments) / totalAdjustedFT;
+
+        // Apply trapezoidal rule
         sum += (f_t + f_tNext) / 2 * deltaT;
 
         // Add intermediate calculations to detailed logs
@@ -48,7 +51,7 @@ function trapezoidalRule(t0, t1, params, allAssignments) {
             f_t,
             f_tNext,
             partialSum: sum,
-            totalFT,
+            totalAdjustedFT,
         });
     }
 
@@ -56,17 +59,28 @@ function trapezoidalRule(t0, t1, params, allAssignments) {
 }
 
 // Priority function
-function priorityFunction(t, params, totalFT) {
+function priorityFunction(t, params, allAssignments) {
     const { k, Tmax, D, muDueTimes, sigmaDueTimes, muLoggedTimes, sigmaLoggedTimes, loggedTime } = params;
 
-    // Original priority calculation
+    // Original priority calculation for f(t)
     const expTerm = (1 - Math.exp(-k * (Tmax - (D - t)) / Tmax)) / (1 - Math.exp(-k));
-    const firstTerm = (0.5 + 0.5 * expTerm) * ((D - t) - muDueTimes) / sigmaDueTimes;
-    const secondTerm = (0.5 - 0.5 * expTerm) * (loggedTime - muLoggedTimes) / sigmaLoggedTimes;
-    const result = firstTerm + secondTerm;
+    const firstTerm = (0.5 + 0.5 * expTerm) * (muDueTimes - (D - t)) / sigmaDueTimes;
+    const secondTerm = (0.5 - 0.5 * expTerm) * (muLoggedTimes - loggedTime) / sigmaLoggedTimes;
+    const f_t = firstTerm + secondTerm;
 
-    // Normalize by total sum
-    return result / totalFT;
+    // Calculate f_min across all assignments
+    const f_min = Math.min(
+        ...allAssignments.map((assignment) => {
+            const expTermA = (1 - Math.exp(-k * (Tmax - (assignment.D - t)) / Tmax)) / (1 - Math.exp(-k));
+            const firstTermA = (0.5 + 0.5 * expTermA) * (muDueTimes - (assignment.D - t)) / sigmaDueTimes;
+            const secondTermA = (0.5 - 0.5 * expTermA) * (muLoggedTimes - assignment.loggedTime) / sigmaLoggedTimes;
+            return firstTermA + secondTermA;
+        })
+    );
+
+    // Normalize f(t) using f_min
+    const adjusted_f_t = f_t + Math.abs(f_min);
+    return adjusted_f_t;
 }
 
 // Calculate mean
