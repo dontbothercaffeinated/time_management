@@ -26,61 +26,47 @@ function logWithTimestamp(message, data = null) {
 // Trapezoidal rule implementation
 function trapezoidalRule(t0, t1, params, allAssignments) {
     const deltaT = 1; // Step size in seconds
-    let sum = 0;
-    const detailedLogs = []; // Collect logs for each slice
+    const totalShares = new Array(allAssignments.length).fill(0); // Track total shares for each assignment
 
+    // Loop through each slice
     for (let t = t0; t < t1; t += deltaT) {
-        // Calculate adjusted f(t) values for all assignments
-        const adjustedFTs = allAssignments.map((assignment) => {
-            return priorityFunction(t, assignment, allAssignments);
-        });
+        // Compute f(t) for all assignments in this slice
+        const fTValues = allAssignments.map((assignment) =>
+            calculateFT(t, assignment, params)
+        );
 
-        // Calculate total adjusted f(t) sum across all assignments
-        const totalAdjustedFT = adjustedFTs.reduce((total, value) => total + value, 0);
+        // Find f_min for this slice
+        const fMin = Math.min(...fTValues);
 
-        // Calculate normalized f'(t) for this assignment
-        const f_t = priorityFunction(t, params, allAssignments) / totalAdjustedFT;
-        const f_tNext = priorityFunction(t + deltaT, params, allAssignments) / totalAdjustedFT;
+        // Adjust all f(t) values by adding |f_min| to make them positive
+        const adjustedFT = fTValues.map((f_t) => f_t + Math.abs(fMin));
 
-        // Apply trapezoidal rule
-        sum += (f_t + f_tNext) / 2 * deltaT;
+        // Compute total sum of adjusted f(t) values for this slice
+        const totalAdjustedFTSum = adjustedFT.reduce((total, value) => total + value, 0);
 
-        // Add intermediate calculations to detailed logs
-        detailedLogs.push({
-            t,
-            f_t,
-            f_tNext,
-            partialSum: sum,
-            totalAdjustedFT,
+        // Compute proportions (share of the second) for each assignment
+        const proportions = adjustedFT.map((value) => value / totalAdjustedFTSum);
+
+        // Add each proportion (share of the second) to the corresponding total
+        proportions.forEach((proportion, index) => {
+            totalShares[index] += proportion * deltaT; // Add the share for this second
         });
     }
 
-    return sum;
+    // Return the total shares for all assignments
+    return totalShares;
 }
 
-// Priority function
-function priorityFunction(t, params, allAssignments) {
-    const { k, Tmax, D, muDueTimes, sigmaDueTimes, muLoggedTimes, sigmaLoggedTimes, loggedTime } = params;
 
-    // Original priority calculation for f(t)
+function calculateFT(t, assignment, params) {
+    const { k, Tmax, muDueTimes, sigmaDueTimes, muLoggedTimes, sigmaLoggedTimes } = params;
+    const { dueDate: D, workedSeconds: loggedTime } = assignment;
+
     const expTerm = (1 - Math.exp(-k * (Tmax - (D - t)) / Tmax)) / (1 - Math.exp(-k));
     const firstTerm = (0.5 + 0.5 * expTerm) * (muDueTimes - (D - t)) / sigmaDueTimes;
     const secondTerm = (0.5 - 0.5 * expTerm) * (muLoggedTimes - loggedTime) / sigmaLoggedTimes;
-    const f_t = firstTerm + secondTerm;
 
-    // Calculate f_min across all assignments
-    const f_min = Math.min(
-        ...allAssignments.map((assignment) => {
-            const expTermA = (1 - Math.exp(-k * (Tmax - (assignment.D - t)) / Tmax)) / (1 - Math.exp(-k));
-            const firstTermA = (0.5 + 0.5 * expTermA) * (muDueTimes - (assignment.D - t)) / sigmaDueTimes;
-            const secondTermA = (0.5 - 0.5 * expTermA) * (muLoggedTimes - assignment.loggedTime) / sigmaLoggedTimes;
-            return firstTermA + secondTermA;
-        })
-    );
-
-    // Normalize f(t) using f_min
-    const adjusted_f_t = f_t + Math.abs(f_min);
-    return adjusted_f_t;
+    return firstTerm + secondTerm;
 }
 
 // Calculate mean
@@ -135,60 +121,39 @@ const standardDeviationDueDates = calculateStandardDeviationForKey(assignments, 
 const meanWorkedSeconds = calculateMeanForKey(assignments, "workedSeconds", t1);
 const standardDeviationWorkedSeconds = calculateStandardDeviationForKey(assignments, "workedSeconds", meanWorkedSeconds, t1);
 
-let totalPrioritySum = 0; // To track the total sum of normalized priorities
+const params = {
+    k: userVariables.k,
+    Tmax: tMaxVal,
+    muDueTimes: meanDueDate,
+    sigmaDueTimes: standardDeviationDueDates,
+    muLoggedTimes: meanWorkedSeconds,
+    sigmaLoggedTimes: standardDeviationWorkedSeconds,
+};
 
+const totalShares = trapezoidalRule(t0, t1, params, assignments);
+
+// Log cumulative totals for each assignment
 assignments.forEach((assignment, index) => {
-    logWithTimestamp(`Processing assignment ${index + 1}`, assignment);
-
-    const params = {
-        k: userVariables.k,
-        Tmax: tMaxVal,
-        D: assignment.dueDate,
-        muDueTimes: meanDueDate,
-        sigmaDueTimes: standardDeviationDueDates,
-        muLoggedTimes: meanWorkedSeconds,
-        sigmaLoggedTimes: standardDeviationWorkedSeconds,
-        loggedTime: assignment.workedSeconds,
-    };
-
-    // Log all parameters for the current assignment
-    logWithTimestamp(`Parameters for assignment ${index + 1}`, {
-        ...params,
-        t0,
-        t1,
-    });    
-
-
-    // Start the timer
-    const startTime = Date.now();
-
-    // Perform trapezoidal rule calculation and log detailed steps to file
-    const result = trapezoidalRule(t0, t1, params, assignments.map((a) => ({
-        k: userVariables.k,
-        Tmax: tMaxVal,
-        D: a.dueDate,
-        muDueTimes: meanDueDate,
-        sigmaDueTimes: standardDeviationDueDates,
-        muLoggedTimes: meanWorkedSeconds,
-        sigmaLoggedTimes: standardDeviationWorkedSeconds,
-        loggedTime: a.workedSeconds,
-    })));
-
-    // Stop the timer and calculate the elapsed time
-    const elapsedTime = (Date.now() - startTime) / 1000; // Convert milliseconds to seconds
-
-    // Add the result to the total priority sum
-    totalPrioritySum += result;
-
-    // Log final result to console
-    logWithTimestamp(`Finished processing assignment ${index + 1}`, { result });
-    logWithTimestamp(`Time taken for assignment ${index + 1}:`, { elapsedTime: `${elapsedTime.toFixed(2)} seconds` });
+    logWithTimestamp(`Total shares for assignment ${index + 1}`, { totalShare: totalShares[index] });
 });
 
-// At the end, log verification of the total sum
+// Log verification of the total sum
 const expectedTotal = t1 - t0;
+const totalPrioritySum = totalShares.reduce((sum, share) => sum + share, 0);
 logWithTimestamp("Verification of Total Priorities", {
     totalPrioritySum,
     expectedTotal,
     matches: Math.abs(totalPrioritySum - expectedTotal) < 1e-6, // Check if they are approximately equal
 });
+
+// // Log the totalShares array
+// logWithTimestamp("Total shares array output", totalShares);
+
+// // Find the three assignments with the greatest shares
+// const top3Assignments = totalShares
+//     .map((share, index) => ({ index: index + 1, share }))
+//     .sort((a, b) => b.share - a.share) // Sort descending by share
+//     .slice(0, 3); // Get the top 3
+
+// // Log the top 3 assignments
+// logWithTimestamp("Top 3 assignments with greatest shares", top3Assignments);
