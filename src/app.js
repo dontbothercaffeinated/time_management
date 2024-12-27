@@ -76,7 +76,7 @@ function updateAssignmentList(filter = 'all') {
             <div class="assignment-row">
                 <div class="variable-box">${assignment.course}</div>
                 <div class="variable-box">${assignment.name}</div>
-                <div class="variable-box">${assignment.dueDate}</div>
+                <div class="variable-box">${new Date(assignment.dueDate).toLocaleDateString()}</div>
                 <div class="variable-box">${(assignment.workedSeconds / 60).toFixed(2)} mins</div>
             </div>
             <button class="edit-button">Edit</button>
@@ -193,7 +193,10 @@ async function saveEditPopup() {
     if (popupDueDate && editingAssignmentIndex !== null) {
         try {
             const assignment = assignments[editingAssignmentIndex];
-            const result = await window.electron.editAssignment(assignment.id, popupDueDate);
+            // Use the local time zone to construct the Date object
+            const [year, month, day] = popupDueDate.split('-').map(Number);
+            const unixTimestamp = new Date(year, month - 1, day).getTime(); // Convert to Unix timestamp in local time zone
+            const result = await window.electron.editAssignment(assignment.id, unixTimestamp);
 
             if (result) {
                 // Close the popup and refresh the UI
@@ -241,8 +244,11 @@ document.getElementById('project-form').addEventListener('submit', async (event)
 
     if (course && name && dueDate) {
         try {
-            // Pass the selected date as-is (no UTC conversion)
-            await window.electron.addAssignment(course, name, dueDate);
+            // Use the local time zone to construct the Date object
+            const [year, month, day] = dueDate.split('-').map(Number);
+            const unixTimestamp = new Date(year, month - 1, day).getTime(); // Convert to Unix timestamp in local time zone
+            // Pass the selected as Unix timestamp
+            await window.electron.addAssignment(course, name, unixTimestamp);
             fetchData(); // Refresh the UI with the new assignment (includes reset)
         } catch (error) {
             console.error('Error adding assignment:', error);
