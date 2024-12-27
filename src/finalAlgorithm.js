@@ -109,7 +109,7 @@ function calculateTmax(assignments, minTmax) {
 }
 
 // Main script execution
-const rawData = fs.readFileSync('./test_data.json', 'utf8');
+const rawData = fs.readFileSync('../db/assignments.json', 'utf8');
 const assignments = JSON.parse(rawData);
 
 const tMaxVal = calculateTmax(assignments, userVariables.minimumTmax);
