@@ -3,14 +3,6 @@ const userVariables = require('./user_variables_algorithm');
 const systemVariables = require('./system_variables_algorithm');
 const readlineSync = require('readline-sync');
 
-// File for logging
-const logFile = 'assignment_logs.json';
-
-// Helper function for detailed logging to file
-function appendToFile(data, filename) {
-    fs.appendFileSync(filename, JSON.stringify(data, null, 2) + '\n');
-}
-
 // Helper function for console logging with timestamps
 function logWithTimestamp(message, data = null) {
     const timestamp = new Date().toISOString();
@@ -19,8 +11,6 @@ function logWithTimestamp(message, data = null) {
     if (data !== null) {
         console.log(JSON.stringify(data, null, 2));
     }
-    // Write to the log file
-    appendToFile({ timestamp, message, data }, logFile);
 }
 
 // Trapezoidal rule implementation
@@ -38,8 +28,8 @@ function trapezoidalRule(t0, t1, params, allAssignments) {
         // Find f_min for this slice
         const fMin = Math.min(...fTValues);
 
-        // Adjust all f(t) values by adding |f_min| to make them positive
-        const adjustedFT = fTValues.map((f_t) => f_t + Math.abs(fMin));
+        // Adjust all f(t) values by adding 2 * |f_min| to ensure non-zero shares
+        const adjustedFT = fTValues.map((f_t) => f_t + 2 * Math.abs(fMin));
 
         // Compute total sum of adjusted f(t) values for this slice
         const totalAdjustedFTSum = adjustedFT.reduce((total, value) => total + value, 0);
