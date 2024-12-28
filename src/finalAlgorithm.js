@@ -16,34 +16,29 @@ function logWithTimestamp(message, data = null) {
 // Trapezoidal rule implementation
 function trapezoidalRule(t0, t1, params, allAssignments) {
     const deltaT = 1; // Step size in seconds
-    const totalShares = new Array(allAssignments.length).fill(0); // Track total shares for each assignment
+    const rawTotals = new Array(allAssignments.length).fill(0); // Track cumulative raw priority scores for each assignment
 
     // Loop through each slice
     for (let t = t0; t < t1; t += deltaT) {
         // Compute f(t) for all assignments in this slice
         const fTValues = allAssignments.map((assignment) =>
-            calculateFT(t, assignment, params)
+            calculateFT(t, assignment, params).priority
         );
 
-        // Find f_min for this slice
+        // Adjust fTValues to make them non-negative
         const fMin = Math.min(...fTValues);
-
-        // Adjust all f(t) values by adding 2 * |f_min| to ensure non-zero shares
         const adjustedFT = fTValues.map((f_t) => f_t + 2 * Math.abs(fMin));
 
-        // Compute total sum of adjusted f(t) values for this slice
-        const totalAdjustedFTSum = adjustedFT.reduce((total, value) => total + value, 0);
-
-        // Compute proportions (share of the second) for each assignment
-        const proportions = adjustedFT.map((value) => value / totalAdjustedFTSum);
-
-        // Add each proportion (share of the second) to the corresponding total
-        proportions.forEach((proportion, index) => {
-            totalShares[index] += proportion * deltaT; // Add the share for this second
+        // Accumulate adjusted priority scores for each assignment
+        adjustedFT.forEach((value, index) => {
+        rawTotals[index] += value; // Add adjusted priority score for this second
         });
     }
 
-    // Return the total shares for all assignments
+    // Normalize cumulative raw priority scores to calculate proportions
+    const totalRawScore = rawTotals.reduce((sum, value) => sum + value, 0);
+    const totalShares = rawTotals.map((value) => (value / totalRawScore) * (t1 - t0)); // Proportional shares of total time elapsed
+
     return totalShares;
 }
 
@@ -52,11 +47,28 @@ function calculateFT(t, assignment, params) {
     const { k, Tmax, muDueTimes, sigmaDueTimes, muLoggedTimes, sigmaLoggedTimes } = params;
     const { dueDate: D, workedSeconds: loggedTime } = assignment;
 
-    const expTerm = (1 - Math.exp(-k * (Tmax - (D - t)) / Tmax)) / (1 - Math.exp(-k));
-    const firstTerm = (0.5 + 0.5 * expTerm) * (muDueTimes - (D - t)) / sigmaDueTimes;
-    const secondTerm = (0.5 - 0.5 * expTerm) * (muLoggedTimes - loggedTime) / sigmaLoggedTimes;
+    const timeUntilDue = D - t; // Time remaining until due date
 
-    return firstTerm + secondTerm;
+    let weightDueTime, weightLoggedTime;
+
+    if (timeUntilDue > Tmax) {
+        weightDueTime = 1; // Outside Tmax: Both weights are 1
+        weightLoggedTime = 1;
+    } else {
+        const percentTmaxRemaining = timeUntilDue / Tmax; // % of Tmax remaining
+        const expTerm = Math.exp(-k * (1 - percentTmaxRemaining)); // Exponential term
+    
+        // Ensure weights transition correctly
+        weightDueTime = 1 + (1 - expTerm); // Starts at 1, grows to 2
+        weightLoggedTime = expTerm; // Starts at 1, decays to 0
+    }
+
+    const dueTimeZScore = (muDueTimes - timeUntilDue) / sigmaDueTimes;
+    const loggedTimeZScore = (muLoggedTimes - loggedTime) / sigmaLoggedTimes;
+
+    const priority = weightDueTime * dueTimeZScore + weightLoggedTime * loggedTimeZScore;
+
+    return { dueTimeZScore, loggedTimeZScore, priority };
 }
 
 // Calculate mean
@@ -92,10 +104,8 @@ function getCurrentUnixTime() {
 
 // Calculate Tmax
 function calculateTmax(assignments, minTmax) {
-    const currentTime = getCurrentUnixTime();
-    const secondsUntilDue = assignments.map((assignment) => assignment.dueDate - currentTime);
-    const meanSecondsUntilDue = secondsUntilDue.reduce((sum, value) => sum + value, 0) / secondsUntilDue.length;
-    return Math.max(minTmax, meanSecondsUntilDue);
+    // Always return the minimumTmax value
+    return minTmax;
 }
 
 // Main script execution
@@ -105,6 +115,12 @@ const assignments = JSON.parse(rawData);
 const tMaxVal = calculateTmax(assignments, userVariables.minimumTmax);
 const t0 = systemVariables.t0;
 const t1 = getCurrentUnixTime();
+const totalTimeElapsed = t1 - t0;
+
+console.log(`Tmax: ${tMaxVal}`);
+console.log(`t0: ${t0}`);
+console.log(`t1: ${t1}`);
+console.log(`Total time elapsed (t1 - t0): ${totalTimeElapsed} seconds`);
 
 const meanDueDate = calculateMeanForKey(assignments, "dueDate", t1);
 const standardDeviationDueDates = calculateStandardDeviationForKey(assignments, "dueDate", meanDueDate, t1);
@@ -122,10 +138,26 @@ const params = {
 
 const totalShares = trapezoidalRule(t0, t1, params, assignments);
 
-// Log cumulative totals for each assignment
 assignments.forEach((assignment, index) => {
-    logWithTimestamp(`Total shares for assignment ${index + 1}`, { totalShare: totalShares[index] });
+    console.log(`Assignment: ${assignment.name}`);
+    console.log(`  Total Shares: ${totalShares[index].toFixed(3)}`);
 });
+
+// Log cumulative totals for each assignment
+assignments.forEach((assignment) => {
+    const { dueTimeZScore, loggedTimeZScore, priority } = calculateFT(t1, assignment, params);
+    console.log(`Assignment: ${assignment.name}`);
+    console.log(`  Average Due Time Z-Score: ${dueTimeZScore.toFixed(3)}`);
+    console.log(`  Logged Time Z-Score: ${loggedTimeZScore.toFixed(3)}`);
+    console.log(`  Priority: ${priority.toFixed(3)}`);
+});
+
+console.log("\nSummary:");
+console.log(`Tmax: ${tMaxVal}`);
+console.log(`t0: ${t0}`);
+console.log(`t1: ${t1}`);
+console.log(`Total time elapsed (t1 - t0): ${totalTimeElapsed} seconds`);
+
 
 // Log verification of the total sum
 const expectedTotal = t1 - t0;
