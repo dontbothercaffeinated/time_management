@@ -136,6 +136,18 @@ const params = {
 
 const totalShares = trapezoidalRule(t1, params, assignments);
 
+// Prepare data to write to current_session_priorities.json
+// (CHANGE: Added this block to create the array for the JSON file)
+const sessionPriorities = assignments.map((assignment, index) => ({
+    id: assignment.id,                  // Use the `id` field from the assignment
+    totalShare: totalShares[index]      // Use the calculated share
+}));
+
+// Write data to db/current_session_priorities.json
+// (CHANGE: Added this block to save data to a file)
+fs.writeFileSync('../db/current_session_priorities.json', JSON.stringify(sessionPriorities, null, 2));
+console.log("Current session priorities saved to db/current_session_priorities.json.");
+
 assignments.forEach((assignment, index) => {
     console.log(`Assignment: ${assignment.name}`);
     console.log(`  Total Shares: ${totalShares[index].toFixed(3)}`);
