@@ -14,10 +14,7 @@ function logWithTimestamp(message, data = null) {
 }
 
 // Trapezoidal rule implementation
-function trapezoidalRule(t0, t1, params, allAssignments) {
-    const deltaT = 1; // Step size in seconds
-    const rawTotals = new Array(allAssignments.length).fill(0); // Track cumulative raw priority scores for each assignment
-
+function trapezoidalRule(t1, params, allAssignments) {
     const n = allAssignments.length; // Total number of assignments
     const priorityAmplificationFactor = userVariables.priorityAmplificationFactor; // Custom base for logarithm (e.g., base 0.5 for more amplification)
 
@@ -28,29 +25,21 @@ function trapezoidalRule(t0, t1, params, allAssignments) {
 
     const logN = Math.log(n) / Math.log(priorityAmplificationFactor); // Compute log(n) with custom base
 
-    // Loop through each slice
-    for (let t = t0; t < t1; t += deltaT) {
-        // Compute f(t) for all assignments in this slice
-        const fTValues = allAssignments.map((assignment) =>
-            calculateFT(t, assignment, params).priority
-        );
+    // Compute f(t) for the current moment
+    const fTValues = allAssignments.map((assignment) =>
+        calculateFT(t1, assignment, params).priority
+    );
 
-        // Adjust fTValues to make them non-negative
-        const fMin = Math.min(...fTValues);
-        const adjustedFT = fTValues.map((f_t) => f_t + 2 * Math.abs(fMin));
+    // Adjust fTValues to make them non-negative
+    const fMin = Math.min(...fTValues);
+    const adjustedFT = fTValues.map((f_t) => f_t + 2 * Math.abs(fMin));
 
-        // Raise each adjusted priority score to the power of log(n)
-        const amplifiedFT = adjustedFT.map((f_t) => Math.pow(f_t, logN));
+    // Raise each adjusted priority score to the power of log(n)
+    const amplifiedFT = adjustedFT.map((f_t) => Math.pow(f_t, n));
 
-        // Accumulate adjusted priority scores for each assignment
-        amplifiedFT.forEach((value, index) => {
-        rawTotals[index] += value; // Add adjusted priority score for this second
-        });
-    }
-
-    // Normalize cumulative raw priority scores to calculate proportions
-    const totalRawScore = rawTotals.reduce((sum, value) => sum + value, 0);
-    const totalShares = rawTotals.map((value) => (value / totalRawScore) * (t1 - t0)); // Proportional shares of total time elapsed
+    // Normalize cumulative raw priority scores to calculate shares for a single second
+    const totalRawScore = amplifiedFT.reduce((sum, value) => sum + value, 0);
+    const totalShares = amplifiedFT.map((value) => value / totalRawScore); 
 
     return totalShares;
 }
@@ -126,14 +115,10 @@ const rawData = fs.readFileSync('../db/assignments.json', 'utf8');
 const assignments = JSON.parse(rawData);
 
 const tMaxVal = calculateTmax(assignments, userVariables.minimumTmax);
-const t0 = systemVariables.t0;
 const t1 = getCurrentUnixTime();
-const totalTimeElapsed = t1 - t0;
 
 console.log(`Tmax: ${tMaxVal}`);
-console.log(`t0: ${t0}`);
 console.log(`t1: ${t1}`);
-console.log(`Total time elapsed (t1 - t0): ${totalTimeElapsed} seconds`);
 
 const meanDueDate = calculateMeanForKey(assignments, "dueDate", t1);
 const standardDeviationDueDates = calculateStandardDeviationForKey(assignments, "dueDate", meanDueDate, t1);
@@ -149,7 +134,7 @@ const params = {
     sigmaLoggedTimes: standardDeviationWorkedSeconds,
 };
 
-const totalShares = trapezoidalRule(t0, t1, params, assignments);
+const totalShares = trapezoidalRule(t1, params, assignments);
 
 assignments.forEach((assignment, index) => {
     console.log(`Assignment: ${assignment.name}`);
@@ -167,18 +152,14 @@ assignments.forEach((assignment) => {
 
 console.log("\nSummary:");
 console.log(`Tmax: ${tMaxVal}`);
-console.log(`t0: ${t0}`);
 console.log(`t1: ${t1}`);
-console.log(`Total time elapsed (t1 - t0): ${totalTimeElapsed} seconds`);
 
 
 // Log verification of the total sum
-const expectedTotal = t1 - t0;
 const totalPrioritySum = totalShares.reduce((sum, share) => sum + share, 0);
 logWithTimestamp("Verification of Total Priorities", {
     totalPrioritySum,
-    expectedTotal,
-    matches: Math.abs(totalPrioritySum - expectedTotal) < 1e-6, // Check if they are approximately equal
+    matches: Math.abs(totalPrioritySum - 1) < 1e-6, // Check if they sum to 1
 });
 
 // // Log the totalShares array
