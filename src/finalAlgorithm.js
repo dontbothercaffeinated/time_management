@@ -18,6 +18,16 @@ function trapezoidalRule(t0, t1, params, allAssignments) {
     const deltaT = 1; // Step size in seconds
     const rawTotals = new Array(allAssignments.length).fill(0); // Track cumulative raw priority scores for each assignment
 
+    const n = allAssignments.length; // Total number of assignments
+    const priorityAmplificationFactor = userVariables.priorityAmplificationFactor; // Custom base for logarithm (e.g., base 0.5 for more amplification)
+
+    // Validate `priorityAmplificationFactor`
+    if (typeof priorityAmplificationFactor !== 'number' || priorityAmplificationFactor <= 1) {
+        throw new Error("priorityAmplificationFactor must be a number greater than 1.");
+    }
+
+    const logN = Math.log(n) / Math.log(priorityAmplificationFactor); // Compute log(n) with custom base
+
     // Loop through each slice
     for (let t = t0; t < t1; t += deltaT) {
         // Compute f(t) for all assignments in this slice
@@ -29,8 +39,11 @@ function trapezoidalRule(t0, t1, params, allAssignments) {
         const fMin = Math.min(...fTValues);
         const adjustedFT = fTValues.map((f_t) => f_t + 2 * Math.abs(fMin));
 
+        // Raise each adjusted priority score to the power of log(n)
+        const amplifiedFT = adjustedFT.map((f_t) => Math.pow(f_t, logN));
+
         // Accumulate adjusted priority scores for each assignment
-        adjustedFT.forEach((value, index) => {
+        amplifiedFT.forEach((value, index) => {
         rawTotals[index] += value; // Add adjusted priority score for this second
         });
     }
