@@ -8,6 +8,10 @@ let selectedAssignmentId = null;
 // Fetch data from the backend
 async function fetchData() {
     try {
+        // Fetch system variables for session duration
+        const systemVariables = await window.electron.getSystemVariables();
+        document.getElementById('session-duration').textContent = formatSessionTime(systemVariables.defaultSessionDurationSeconds);
+
         const response = await window.electron.fetchData();
         courses = response.courses;
         assignments = response.assignments;
@@ -16,6 +20,22 @@ async function fetchData() {
         updateUI();
     } catch (error) {
         console.error('Error fetching data:', error);
+    }
+}
+
+async function updateSessionDuration(newDurationSeconds) {
+    try {
+        const updated = await window.electron.updateSystemVariables({
+            defaultSessionDurationSeconds: newDurationSeconds,
+        });
+        if (updated) {
+            alert('Session duration updated successfully!');
+            fetchData(); // Refresh data to reflect changes
+        } else {
+            alert('Failed to update session duration.');
+        }
+    } catch (error) {
+        console.error('Error updating session duration:', error);
     }
 }
 
@@ -132,6 +152,35 @@ function handleStartStopButton() {
     }
 }
 
+function showEditSessionPopup() {
+    const popup = document.getElementById('edit-session-popup');
+    const input = document.getElementById('session-duration-input');
+
+    // Fetch the currently displayed session duration
+    input.value = document.getElementById('session-duration').textContent;
+    popup.style.display = 'flex';
+}
+
+function hideEditSessionPopup() {
+    const popup = document.getElementById('edit-session-popup');
+    popup.style.display = 'none';
+}
+
+document.getElementById('save-session-duration-button').addEventListener('click', () => {
+    const input = document.getElementById('session-duration-input').value;
+    const [hours, minutes, seconds] = input.split(':').map(Number);
+    if (!isNaN(hours) && !isNaN(minutes) && !isNaN(seconds)) {
+        const totalSeconds = hours * 3600 + minutes * 60 + seconds;
+        updateSessionDuration(totalSeconds);
+        hideEditSessionPopup();
+    } else {
+        alert('Invalid time format. Please use hours:minutes:seconds.');
+    }
+});
+
+document.getElementById('cancel-session-duration-button').addEventListener('click', hideEditSessionPopup);
+document.getElementById('edit-session-duration-button').addEventListener('click', showEditSessionPopup);
+
 function resetTimer() {
     document.getElementById('start-stop-button').textContent = 'Start Working';
     document.getElementById('start-stop-button').classList.remove('stop');
@@ -142,6 +191,13 @@ function formatTime(seconds) {
     const minutes = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+}
+
+function formatSessionTime(seconds) {
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const secs = seconds % 60;
+    return `${String(hours)}:${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
 }
 
 async function logWorkTime(secondsWorked) {

@@ -19,4 +19,7 @@ contextBridge.exposeInMainWorld('electron', {
     
     logTime: (assignmentId, secondsWorked) =>
         ipcRenderer.invoke('log-time', assignmentId, secondsWorked),
+    
+    getSystemVariables: () => ipcRenderer.invoke('getSystemVariables'),
+    updateSystemVariables: (updatedVariables) => ipcRenderer.invoke('updateSystemVariables', updatedVariables),
 });

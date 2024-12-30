@@ -5,6 +5,7 @@ const fs = require('fs');
 // Paths for JSON database
 const assignmentsPath = path.join(__dirname, '..', 'db', 'assignments.json');
 const coursesPath = path.join(__dirname, '..', 'db', 'courses.json');
+const systemVariablesPath = path.join(__dirname, '..', 'db', 'system_variables.json');
 
 // Function to load courses from the JSON database
 async function loadCourses() {
@@ -24,6 +25,26 @@ async function saveCourses(courses) {
     } catch (error) {
         console.error('Error saving courses:', error);
         throw error;
+    }
+}
+
+async function loadSystemVariables() {
+    try {
+        const data = await fs.promises.readFile(systemVariablesPath, 'utf-8');
+        return JSON.parse(data);
+    } catch (error) {
+        console.error('Error loading system variables:', error);
+        return { defaultSessionDurationSeconds: 14400 }; // Fallback to 4 hours
+    }
+}
+
+async function updateSystemVariables(newVariables) {
+    try {
+        await fs.promises.writeFile(systemVariablesPath, JSON.stringify(newVariables, null, 2), 'utf-8');
+        return true;
+    } catch (error) {
+        console.error('Error updating system variables:', error);
+        return false;
     }
 }
 
@@ -173,6 +194,14 @@ ipcMain.handle('deleteCourse', async (event, courseName) => {
 // Handle log time requests from renderer
 ipcMain.handle('log-time', async (event, assignmentId, secondsWorked) => {
     return await logTime(assignmentId, secondsWorked);
+});
+
+ipcMain.handle('getSystemVariables', async () => {
+    return await loadSystemVariables();
+});
+
+ipcMain.handle('updateSystemVariables', async (event, updatedVariables) => {
+    return await updateSystemVariables(updatedVariables);
 });
 
 app.whenReady().then(() => {

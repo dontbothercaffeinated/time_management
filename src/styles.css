@@ -356,6 +356,65 @@ li {
     gap: 10px;                 /* Add spacing between the table and buttons */
 }
 
+/* Specific styles for the Edit Session Duration Popup */
+#edit-session-popup .popup-content {
+    background: #fff; /* Ensure a white background */
+    padding: 20px; /* Add spacing around the content */
+    border-radius: 10px; /* Rounded corners */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2); /* Add subtle shadow for depth */
+    width: 400px; /* Consistent width for the popup */
+    text-align: center; /* Center-align the content */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Styles for the input field inside the Edit Session Duration Popup */
+#edit-session-popup #session-duration-input {
+    width: 100%; /* Full width */
+    padding: 10px; /* Add padding inside the input */
+    margin: 10px 0; /* Add spacing around the input */
+    font-size: 1rem; /* Consistent font size */
+    border: 1px solid #ddd; /* Subtle border */
+    border-radius: 5px; /* Rounded corners */
+}
+
+/* Styles for the action buttons inside the Edit Session Duration Popup */
+#edit-session-popup .popup-actions {
+    margin-top: 20px; /* Space above the buttons */
+    display: flex; /* Align buttons horizontally */
+    justify-content: center;
+    gap: 10px; /* Space between buttons */
+}
+
+#edit-session-popup .popup-actions button {
+    padding: 10px 20px; /* Add padding for buttons */
+    border: none; /* Remove default borders */
+    border-radius: 5px; /* Rounded corners for buttons */
+    font-size: 1rem; /* Consistent font size */
+    cursor: pointer; /* Pointer cursor on hover */
+}
+
+/* Green Save button for Edit Session Duration */
+#edit-session-popup #save-session-duration-button {
+    background-color: #28a745; /* Green background */
+    color: white; /* White text */
+}
+
+#edit-session-popup #save-session-duration-button:hover {
+    opacity: 0.9; /* Slight hover effect */
+}
+
+/* Red Cancel button for Edit Session Duration */
+#edit-session-popup #cancel-session-duration-button {
+    background-color: #dc3545; /* Red background */
+    color: white; /* White text */
+}
+
+#edit-session-popup #cancel-session-duration-button:hover {
+    opacity: 0.9; /* Slight hover effect */
+}
+
 /* Responsive Design */
 @media (max-width: 600px) {
     form {
