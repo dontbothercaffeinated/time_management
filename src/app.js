@@ -10,7 +10,10 @@ async function fetchData() {
     try {
         // Fetch system variables for session duration
         const systemVariables = await window.electron.getSystemVariables();
+        
+        // Add this to update UI elements dynamically
         document.getElementById('session-duration').textContent = formatSessionTime(systemVariables.defaultSessionDurationSeconds);
+        document.getElementById('time-logged').textContent = formatSessionTime(systemVariables.currentSessionLoggedSeconds);
 
         const response = await window.electron.fetchData();
         courses = response.courses;
@@ -138,6 +141,7 @@ function handleStartStopButton() {
                 clearInterval(timerInterval);
                 alert('Time is up!');
                 logWorkTime(workDuration); // Log the total time worked
+                logSessionTime(workDuration); // Log time for the session
                 resetTimer();
             }
         }, 1000);
@@ -147,7 +151,11 @@ function handleStartStopButton() {
     } else {
         // Stop timer
         clearInterval(timerInterval);
-        logWorkTime(workDuration - parseInt(timeRemaining.textContent.split(':').reduce((acc, time) => (60 * acc) + +time), 10));
+        
+        // Calculate remaining time and log it
+        const timeWorked = workDuration - parseInt(timeRemaining.textContent.split(':').reduce((acc, time) => (60 * acc) + +time), 10);
+        logWorkTime(timeWorked); // Log the time worked for the assignment
+        logSessionTime(timeWorked); // Log the time for the session
         resetTimer();
     }
 }
@@ -214,6 +222,27 @@ async function logWorkTime(secondsWorked) {
         }
     } catch (error) {
         console.error('Error logging work time:', error);
+    }
+}
+
+async function logSessionTime(secondsWorked) {
+    try {
+        // Fetch current session variables
+        const systemVariables = await window.electron.getSystemVariables();
+
+        // Add the new time to the current session logged seconds
+        const updatedTime = systemVariables.currentSessionLoggedSeconds + secondsWorked;
+
+        // Update the database with the new value
+        await window.electron.updateSystemVariables({
+            ...systemVariables,
+            currentSessionLoggedSeconds: updatedTime
+        });
+
+        // Update the UI to reflect the change
+        document.getElementById('time-logged').textContent = formatSessionTime(updatedTime);
+    } catch (error) {
+        console.error('Error updating session logged time:', error);
     }
 }
 

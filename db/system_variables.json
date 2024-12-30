@@ -1,3 +1,4 @@
 {
-  "defaultSessionDurationSeconds": 9900
+  "defaultSessionDurationSeconds": 9900,
+  "currentSessionLoggedSeconds": 5
 }
