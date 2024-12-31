@@ -1,4 +1,5 @@
 {
   "defaultSessionDurationSeconds": 3600,
-  "currentSessionLoggedSeconds": 0
+  "currentSessionLoggedSeconds": 13,
+  "lastTimeSessionReset": 1735619183
 }

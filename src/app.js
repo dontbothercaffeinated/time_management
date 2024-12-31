@@ -22,6 +22,14 @@ async function fetchData() {
             percentageWorkedElement.textContent = `${isNaN(percentage) ? 0 : percentage}%`;
         }
 
+        // Update hours since last reset
+        const lastResetElement = document.getElementById('hours-since-reset');
+        if (lastResetElement) {
+            const currentTimestamp = Math.floor(Date.now() / 1000); // Current Unix timestamp
+            const hoursSinceReset = Math.floor((currentTimestamp - systemVariables.lastTimeSessionReset) / 3600); // Calculate hours
+            lastResetElement.textContent = `${hoursSinceReset} hours since last reset`;
+        }
+
         const response = await window.electron.fetchData();
         courses = response.courses;
         assignments = response.assignments;
@@ -54,6 +62,31 @@ async function updateSessionDuration(newDurationSeconds) {
         console.error('Error updating session duration:', error);
     }
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+    fetchData();
+    startLiveUpdate(); // Start live updates for hours since reset
+});
+
+function startLiveUpdate() {
+    setInterval(async () => {
+        try {
+            const systemVariables = await window.electron.getSystemVariables();
+
+            // Update hours since last reset
+            const hoursSinceResetElement = document.getElementById('hours-since-reset');
+            if (hoursSinceResetElement && systemVariables.lastTimeSessionReset) {
+                const currentUnixTimestamp = Math.floor(Date.now() / 1000);
+                const secondsSinceReset = currentUnixTimestamp - systemVariables.lastTimeSessionReset;
+                const hoursSinceReset = Math.floor(secondsSinceReset / 3600); // Round down to the nearest hour
+                hoursSinceResetElement.textContent = `${hoursSinceReset} hours`;
+            }
+        } catch (error) {
+            console.error('Error updating live data:', error);
+        }
+    }, 1000 * 60); // Update every minute
+}
+
 
 function updateUI() {
     updateCourseSelect();    // Refresh course dropdowns
@@ -206,9 +239,11 @@ document.getElementById('reset-session-button').addEventListener('click', async 
     try {
         // Reset the value in the database
         const systemVariables = await window.electron.getSystemVariables();
+        const currentTimestamp = Math.floor(Date.now() / 1000); // Get current Unix timestamp
         await window.electron.updateSystemVariables({
             ...systemVariables,
             currentSessionLoggedSeconds: 0,
+            lastTimeSessionReset: currentTimestamp,
         });
 
         fetchData(); // Refresh the UI after resetting

@@ -203,7 +203,7 @@ ipcMain.handle('getSystemVariables', async () => {
         return JSON.parse(data);
     } catch (error) {
         console.error('Error fetching system variables:', error);
-        return { defaultSessionDurationSeconds: 14400, currentSessionLoggedSeconds: 0 }; // Default fallback
+        return { defaultSessionDurationSeconds: 14400, currentSessionLoggedSeconds: 0, lastTimeSessionReset: null }; // Default fallback
     }
 });
 
