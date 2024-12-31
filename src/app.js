@@ -246,6 +246,14 @@ document.getElementById('reset-session-button').addEventListener('click', async 
             lastTimeSessionReset: currentTimestamp,
         });
 
+        // Execute the algorithm
+        const result = await window.electron.executeAlgorithm();
+        if (result.success) {
+            alert('Session reset and priorities updated successfully!');
+        } else {
+            throw new Error(result.error || 'Unknown error occurred');
+        }
+
         fetchData(); // Refresh the UI after resetting
         alert('Session time reset successfully!');
     } catch (error) {

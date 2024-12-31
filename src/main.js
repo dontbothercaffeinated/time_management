@@ -1,6 +1,7 @@
 const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
 const fs = require('fs');
+const { executeAlgorithm } = require(path.join(__dirname, 'finalAlgorithm.js'));
 
 // Paths for JSON database
 const assignmentsPath = path.join(__dirname, '..', 'db', 'assignments.json');
@@ -71,11 +72,13 @@ function createWindow() {
         width: 800,
         height: 600,
         webPreferences: {
-            preload: path.join(__dirname, 'preload.js'),
+            preload: path.join(__dirname, 'preload.js'), // Fix the path
+            contextIsolation: true,
+            nodeIntegration: false,
         },
     });
 
-    mainWindow.loadFile('src/index.html');
+    mainWindow.loadFile(path.join(__dirname, 'index.html')); // Ensure this path is correct too
 }
 
 ipcMain.handle('fetchData', async () => {
@@ -215,6 +218,17 @@ ipcMain.handle('updateSystemVariables', async (event, updatedVariables) => {
     } catch (error) {
         console.error('Error updating system variables:', error);
         return false;
+    }
+});
+
+// Handle algorithm execution
+ipcMain.handle('execute-algorithm', async () => {
+    try {
+        const result = executeAlgorithm();
+        return { success: true, result };
+    } catch (error) {
+        console.error('Error executing algorithm:', error);
+        return { success: false, error: error.message };
     }
 });
 

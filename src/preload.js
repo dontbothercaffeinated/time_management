@@ -1,8 +1,10 @@
 const { contextBridge, ipcRenderer } = require('electron');
 
 contextBridge.exposeInMainWorld('electron', {
+    executeAlgorithm: async () => await ipcRenderer.invoke('execute-algorithm'),
+
     // Course Methods
-    fetchData: () => ipcRenderer.invoke('fetchData'),
+    fetchData: async () => await ipcRenderer.invoke('fetchData'),
     addCourse: (courseName) => ipcRenderer.invoke('addCourse', courseName),
     deleteCourse: async (courseName) => {
         return await ipcRenderer.invoke('deleteCourse', courseName);
@@ -20,6 +22,6 @@ contextBridge.exposeInMainWorld('electron', {
     logTime: (assignmentId, secondsWorked) =>
         ipcRenderer.invoke('log-time', assignmentId, secondsWorked),
     
-    getSystemVariables: () => ipcRenderer.invoke('getSystemVariables'),
-    updateSystemVariables: (updatedVariables) => ipcRenderer.invoke('updateSystemVariables', updatedVariables),
+    getSystemVariables: async () => await ipcRenderer.invoke('getSystemVariables'),
+    updateSystemVariables: async (data) => await ipcRenderer.invoke('updateSystemVariables', data),
 });

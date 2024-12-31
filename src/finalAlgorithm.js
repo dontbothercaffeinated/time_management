@@ -1,4 +1,5 @@
 const fs = require('fs');
+const path = require('path');
 const userVariables = require('./user_variables_algorithm');
 const systemVariables = require('./system_variables_algorithm');
 const readlineSync = require('readline-sync');
@@ -110,78 +111,86 @@ function calculateTmax(assignments, minTmax) {
     return minTmax;
 }
 
-// Main script execution
-const rawData = fs.readFileSync('../db/assignments.json', 'utf8');
-const assignments = JSON.parse(rawData);
+function executeAlgorithm() {
+    // Main script execution
+    const rawData = fs.readFileSync(path.join(__dirname, '../db/assignments.json'), 'utf8');
+    const assignments = JSON.parse(rawData);
 
-const tMaxVal = calculateTmax(assignments, userVariables.minimumTmax);
-const t1 = getCurrentUnixTime();
+    const tMaxVal = calculateTmax(assignments, userVariables.minimumTmax);
+    const t1 = getCurrentUnixTime();
 
-console.log(`Tmax: ${tMaxVal}`);
-console.log(`t1: ${t1}`);
+    console.log(`Tmax: ${tMaxVal}`);
+    console.log(`t1: ${t1}`);
 
-const meanDueDate = calculateMeanForKey(assignments, "dueDate", t1);
-const standardDeviationDueDates = calculateStandardDeviationForKey(assignments, "dueDate", meanDueDate, t1);
-const meanWorkedSeconds = calculateMeanForKey(assignments, "workedSeconds", t1);
-const standardDeviationWorkedSeconds = calculateStandardDeviationForKey(assignments, "workedSeconds", meanWorkedSeconds, t1);
+    const meanDueDate = calculateMeanForKey(assignments, "dueDate", t1);
+    const standardDeviationDueDates = calculateStandardDeviationForKey(assignments, "dueDate", meanDueDate, t1);
+    const meanWorkedSeconds = calculateMeanForKey(assignments, "workedSeconds", t1);
+    const standardDeviationWorkedSeconds = calculateStandardDeviationForKey(assignments, "workedSeconds", meanWorkedSeconds, t1);
 
-const params = {
-    k: userVariables.k,
-    Tmax: tMaxVal,
-    muDueTimes: meanDueDate,
-    sigmaDueTimes: standardDeviationDueDates,
-    muLoggedTimes: meanWorkedSeconds,
-    sigmaLoggedTimes: standardDeviationWorkedSeconds,
-};
+    const params = {
+        k: userVariables.k,
+        Tmax: tMaxVal,
+        muDueTimes: meanDueDate,
+        sigmaDueTimes: standardDeviationDueDates,
+        muLoggedTimes: meanWorkedSeconds,
+        sigmaLoggedTimes: standardDeviationWorkedSeconds,
+    };
 
-const totalShares = trapezoidalRule(t1, params, assignments);
+    const totalShares = trapezoidalRule(t1, params, assignments);
 
-// Prepare data to write to current_session_priorities.json
-// (CHANGE: Added this block to create the array for the JSON file)
-const sessionPriorities = assignments.map((assignment, index) => ({
-    id: assignment.id,                  // Use the `id` field from the assignment
-    totalShare: totalShares[index]      // Use the calculated share
-}));
+    // Prepare data to write to current_session_priorities.json
+    // (CHANGE: Added this block to create the array for the JSON file)
+    const sessionPriorities = assignments.map((assignment, index) => ({
+        id: assignment.id,                  // Use the `id` field from the assignment
+        totalShare: totalShares[index]      // Use the calculated share
+    }));
 
-// Write data to db/current_session_priorities.json
-// (CHANGE: Added this block to save data to a file)
-fs.writeFileSync('../db/current_session_priorities.json', JSON.stringify(sessionPriorities, null, 2));
-console.log("Current session priorities saved to db/current_session_priorities.json.");
+    // Write data to db/current_session_priorities.json
+    // (CHANGE: Added this block to save data to a file)
+    fs.writeFileSync(
+        path.join(__dirname, '../db/current_session_priorities.json'),
+        JSON.stringify(sessionPriorities, null, 2)
+    );
+    console.log("Current session priorities saved to db/current_session_priorities.json.");
 
-assignments.forEach((assignment, index) => {
-    console.log(`Assignment: ${assignment.name}`);
-    console.log(`  Total Shares: ${totalShares[index].toFixed(3)}`);
-});
+    assignments.forEach((assignment, index) => {
+        console.log(`Assignment: ${assignment.name}`);
+        console.log(`  Total Shares: ${totalShares[index].toFixed(3)}`);
+    });
 
-// Log cumulative totals for each assignment
-assignments.forEach((assignment) => {
-    const { dueTimeZScore, loggedTimeZScore, priority } = calculateFT(t1, assignment, params);
-    console.log(`Assignment: ${assignment.name}`);
-    console.log(`  Average Due Time Z-Score: ${dueTimeZScore.toFixed(3)}`);
-    console.log(`  Logged Time Z-Score: ${loggedTimeZScore.toFixed(3)}`);
-    console.log(`  Priority: ${priority.toFixed(3)}`);
-});
+    // Log cumulative totals for each assignment
+    assignments.forEach((assignment) => {
+        const { dueTimeZScore, loggedTimeZScore, priority } = calculateFT(t1, assignment, params);
+        console.log(`Assignment: ${assignment.name}`);
+        console.log(`  Average Due Time Z-Score: ${dueTimeZScore.toFixed(3)}`);
+        console.log(`  Logged Time Z-Score: ${loggedTimeZScore.toFixed(3)}`);
+        console.log(`  Priority: ${priority.toFixed(3)}`);
+    });
 
-console.log("\nSummary:");
-console.log(`Tmax: ${tMaxVal}`);
-console.log(`t1: ${t1}`);
+    console.log("\nSummary:");
+    console.log(`Tmax: ${tMaxVal}`);
+    console.log(`t1: ${t1}`);
 
 
-// Log verification of the total sum
-const totalPrioritySum = totalShares.reduce((sum, share) => sum + share, 0);
-logWithTimestamp("Verification of Total Priorities", {
-    totalPrioritySum,
-    matches: Math.abs(totalPrioritySum - 1) < 1e-6, // Check if they sum to 1
-});
+    // Log verification of the total sum
+    const totalPrioritySum = totalShares.reduce((sum, share) => sum + share, 0);
+    logWithTimestamp("Verification of Total Priorities", {
+        totalPrioritySum,
+        matches: Math.abs(totalPrioritySum - 1) < 1e-6, // Check if they sum to 1
+    });
 
-// // Log the totalShares array
-// logWithTimestamp("Total shares array output", totalShares);
+    // // Log the totalShares array
+    // logWithTimestamp("Total shares array output", totalShares);
 
-// // Find the three assignments with the greatest shares
-// const top3Assignments = totalShares
-//     .map((share, index) => ({ index: index + 1, share }))
-//     .sort((a, b) => b.share - a.share) // Sort descending by share
-//     .slice(0, 3); // Get the top 3
+    // // Find the three assignments with the greatest shares
+    // const top3Assignments = totalShares
+    //     .map((share, index) => ({ index: index + 1, share }))
+    //     .sort((a, b) => b.share - a.share) // Sort descending by share
+    //     .slice(0, 3); // Get the top 3
 
-// // Log the top 3 assignments
-// logWithTimestamp("Top 3 assignments with greatest shares", top3Assignments);
+    // // Log the top 3 assignments
+    // logWithTimestamp("Top 3 assignments with greatest shares", top3Assignments);
+    return sessionPriorities;
+}
+
+module.exports = { executeAlgorithm };
