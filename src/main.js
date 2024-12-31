@@ -196,12 +196,26 @@ ipcMain.handle('log-time', async (event, assignmentId, secondsWorked) => {
     return await logTime(assignmentId, secondsWorked);
 });
 
+// Fetch system variables from the database
 ipcMain.handle('getSystemVariables', async () => {
-    return await loadSystemVariables();
+    try {
+        const data = await fs.promises.readFile(systemVariablesPath, 'utf-8');
+        return JSON.parse(data);
+    } catch (error) {
+        console.error('Error fetching system variables:', error);
+        return { defaultSessionDurationSeconds: 14400, currentSessionLoggedSeconds: 0 }; // Default fallback
+    }
 });
 
+// Update system variables in the database
 ipcMain.handle('updateSystemVariables', async (event, updatedVariables) => {
-    return await updateSystemVariables(updatedVariables);
+    try {
+        await fs.promises.writeFile(systemVariablesPath, JSON.stringify(updatedVariables, null, 2), 'utf-8');
+        return true;
+    } catch (error) {
+        console.error('Error updating system variables:', error);
+        return false;
+    }
 });
 
 app.whenReady().then(() => {

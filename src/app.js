@@ -15,6 +15,13 @@ async function fetchData() {
         document.getElementById('session-duration').textContent = formatSessionTime(systemVariables.defaultSessionDurationSeconds);
         document.getElementById('time-logged').textContent = formatSessionTime(systemVariables.currentSessionLoggedSeconds);
 
+        // Update percentage worked
+        const percentageWorkedElement = document.getElementById('percentage-worked');
+        if (percentageWorkedElement) {
+            const percentage = ((systemVariables.currentSessionLoggedSeconds / systemVariables.defaultSessionDurationSeconds) * 100).toFixed(2);
+            percentageWorkedElement.textContent = `${isNaN(percentage) ? 0 : percentage}%`;
+        }
+
         const response = await window.electron.fetchData();
         courses = response.courses;
         assignments = response.assignments;
@@ -28,9 +35,15 @@ async function fetchData() {
 
 async function updateSessionDuration(newDurationSeconds) {
     try {
-        const updated = await window.electron.updateSystemVariables({
-            defaultSessionDurationSeconds: newDurationSeconds,
-        });
+        // Fetch the current system variables
+        const systemVariables = await window.electron.getSystemVariables();
+
+        // Update only the "defaultSessionDurationSeconds" field
+        systemVariables.defaultSessionDurationSeconds = newDurationSeconds;
+
+        // Save the updated system variables back to the database
+        const updated = await window.electron.updateSystemVariables(systemVariables);
+
         if (updated) {
             alert('Session duration updated successfully!');
             fetchData(); // Refresh data to reflect changes
@@ -188,6 +201,24 @@ document.getElementById('save-session-duration-button').addEventListener('click'
 
 document.getElementById('cancel-session-duration-button').addEventListener('click', hideEditSessionPopup);
 document.getElementById('edit-session-duration-button').addEventListener('click', showEditSessionPopup);
+
+document.getElementById('reset-session-button').addEventListener('click', async () => {
+    try {
+        // Reset the value in the database
+        const systemVariables = await window.electron.getSystemVariables();
+        await window.electron.updateSystemVariables({
+            ...systemVariables,
+            currentSessionLoggedSeconds: 0,
+        });
+
+        fetchData(); // Refresh the UI after resetting
+        alert('Session time reset successfully!');
+    } catch (error) {
+        console.error('Error resetting session time:', error);
+        alert('Failed to reset session time.');
+    }
+});
+
 
 function resetTimer() {
     document.getElementById('start-stop-button').textContent = 'Start Working';
