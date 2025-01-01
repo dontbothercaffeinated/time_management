@@ -245,14 +245,17 @@ document.getElementById('edit-session-duration-button').addEventListener('click'
 
 document.getElementById('reset-session-button').addEventListener('click', async () => {
     try {
-        // Reset the value in the database
+
+        // Reset the lastTimeSessionReset in system_variables.json
         const systemVariables = await window.electron.getSystemVariables();
         const currentTimestamp = Math.floor(Date.now() / 1000); // Get current Unix timestamp
         await window.electron.updateSystemVariables({
             ...systemVariables,
-            currentSessionLoggedSeconds: 0,
-            lastTimeSessionReset: currentTimestamp,
+            lastTimeSessionReset: currentTimestamp, // Update lastTimeSessionReset
         });
+        
+        // Clear the current session work time data
+        await window.electron.clearSessionWorkTime();
 
         // Execute the algorithm
         const result = await window.electron.executeAlgorithm();
@@ -260,6 +263,12 @@ document.getElementById('reset-session-button').addEventListener('click', async 
             alert('Session reset and priorities updated successfully!');
         } else {
             throw new Error(result.error || 'Unknown error occurred');
+        }
+
+        // Refresh the UI to reflect the reset
+        const timeLoggedElement = document.getElementById('time-logged');
+        if (timeLoggedElement) {
+            timeLoggedElement.textContent = formatSessionTime(0); // Set UI to 00:00:00
         }
 
         fetchData(); // Refresh the UI after resetting

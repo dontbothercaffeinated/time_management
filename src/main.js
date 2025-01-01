@@ -195,6 +195,17 @@ ipcMain.handle('deleteCourse', async (event, courseName) => {
     }
 });
 
+ipcMain.handle('updateSessionWorkTime', async (event, sessionWorkTime) => {
+    try {
+        // Overwrite the file with the updated session work time
+        await fs.promises.writeFile(sessionWorkTimePath, JSON.stringify(sessionWorkTime, null, 2), 'utf-8');
+        return true;
+    } catch (error) {
+        console.error('Error updating session work time:', error);
+        return false;
+    }
+});
+
 // Handle log time requests from renderer
 ipcMain.handle('log-time', async (event, assignmentId, secondsWorked) => {
     return await logTime(assignmentId, secondsWorked);
@@ -212,12 +223,13 @@ ipcMain.handle('getSessionWorkTime', async () => {
     }
 });
 
-ipcMain.handle('updateSessionWorkTime', async (event, sessionWorkTime) => {
+ipcMain.handle('clearSessionWorkTime', async () => {
     try {
-        await fs.promises.writeFile(sessionWorkTimePath, JSON.stringify(sessionWorkTime, null, 2), 'utf-8');
+        // Overwrite the file with an empty array
+        await fs.promises.writeFile(sessionWorkTimePath, JSON.stringify([], null, 2), 'utf-8');
         return true;
     } catch (error) {
-        console.error('Error updating session work time:', error);
+        console.error('Error clearing session work time:', error);
         return false;
     }
 });
