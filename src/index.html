@@ -7,83 +7,87 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <header>
-        <h1>Assignment Tracker</h1>
-    </header>
+    <main id="dashboard">
+        <div id="sidebar">
+            <header>
+                <h1>Assignment Tracker</h1>
+            </header>
+        
+            <!-- Add Course Form -->
+            <form id="course-form">
+                <input type="text" id="course-name" placeholder="Course Name" required>
+                <button type="submit">Add Course</button>
+                <button type="button" id="manage-courses-button">Manage Courses</button>
+            </form>
 
-    <main>
-        <!-- Add Course Form -->
-        <form id="course-form">
-            <input type="text" id="course-name" placeholder="Course Name" required>
-            <button type="submit">Add Course</button>
-            <button type="button" id="manage-courses-button">Manage Courses</button>
-        </form>
+            <!-- Add Assignment Form -->
+            <form id="project-form">
+                <select id="course-select" required>
+                    <option value="">Select a Course</option>
+                </select>
+                <input type="text" id="assignment-name" placeholder="Assignment Name" required>
+                <input type="date" id="due-date" required>
+                <button type="submit">Add Assignment</button>
+            </form>
 
-        <!-- Add Assignment Form -->
-        <form id="project-form">
-            <select id="course-select" required>
-                <option value="">Select a Course</option>
-            </select>
-            <input type="text" id="assignment-name" placeholder="Assignment Name" required>
-            <input type="date" id="due-date" required>
-            <button type="submit">Add Assignment</button>
-        </form>
+            <!-- Manage Courses Popup -->
+            <div id="manage-courses-popup" class="popup" style="display: none;">
+                <div class="popup-content">
+                    <h2>Manage Courses</h2>
+                    <ul id="course-list"></ul>
+                    <div class="popup-actions">
+                        <button id="close-manage-courses">Close</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Session Duration Display -->
+            <div id="session-duration-container">
+                <span>Session Duration: </span>
+                <span id="session-duration">4:00:00</span>
+                <button id="edit-session-duration-button">Edit</button>
+            </div>
 
-        <!-- Manage Courses Popup -->
-        <div id="manage-courses-popup" class="popup" style="display: none;">
-            <div class="popup-content">
-                <h2>Manage Courses</h2>
-                <ul id="course-list"></ul>
-                <div class="popup-actions">
-                    <button id="close-manage-courses">Close</button>
+            <div id="time-logged-container">
+                <span>Time Logged in Current Session: </span>
+                <span id="time-logged">0:00:00</span>
+                <button id="reset-session-button">Reset Session</button>
+            </div>
+
+            <div id="percentage-worked-container">
+                <span>Percentage of Current Session Worked: </span>
+                <span id="percentage-worked">0%</span>
+            </div>
+
+            <div id="hours-since-reset-container">
+                <span>Hours Since Last Reset: </span>
+                <span id="hours-since-reset">0 hours since last reset</span>
+            </div>
+
+            <!-- Work Timer Section -->
+            <div id="work-timer">
+                <input id="work-duration" type="number" value="25" min="1" max="240" />
+                <button id="start-stop-button">Start Working</button>
+                <div id="countdown-timer" style="display: none;">
+                    Time Remaining: <span id="time-remaining"></span>
+                </div>
+            </div>
+
+            <div id="dashboard-links">
+                <button id="add-link-button">Add Link</button>
+                <button id="manage-links-button" class="dashboard-action">Manage Links</button>
+                <div id="link-bubbles">
                 </div>
             </div>
         </div>
 
-
-        <!-- Filter and Assignment List -->
-        <select id="filter-select">
-            <option value="all">All Courses</option>
-        </select>
-        <ul id="assignments"></ul>
-
-        <!-- Session Duration Display -->
-        <div id="session-duration-container">
-            <span>Session Duration: </span>
-            <span id="session-duration">4:00:00</span>
-            <button id="edit-session-duration-button">Edit</button>
-        </div>
-
-        <div id="time-logged-container">
-            <span>Time Logged in Current Session: </span>
-            <span id="time-logged">0:00:00</span>
-            <button id="reset-session-button">Reset Session</button>
-        </div>
-
-        <div id="percentage-worked-container">
-            <span>Percentage of Current Session Worked: </span>
-            <span id="percentage-worked">0%</span>
-        </div>
-
-        <div id="hours-since-reset-container">
-            <span>Hours Since Last Reset: </span>
-            <span id="hours-since-reset">0 hours since last reset</span>
-        </div>
-
-        <!-- Work Timer Section -->
-        <div id="work-timer">
-            <input id="work-duration" type="number" value="25" min="1" max="240" />
-            <button id="start-stop-button">Start Working</button>
-            <div id="countdown-timer" style="display: none;">
-                Time Remaining: <span id="time-remaining"></span>
-            </div>
-        </div>
-
-        <div id="dashboard-links">
-            <button id="add-link-button">Add Link</button>
-            <button id="manage-links-button" class="dashboard-action">Manage Links</button>
-            <div id="link-bubbles">
-            </div>
+        <!-- Main Content -->
+        <div id="main-content">
+            <!-- Filter and Assignment List -->
+            <select id="filter-select">
+                <option value="all">All Courses</option>
+            </select>
+            <ul id="assignments"></ul>
         </div>
     </main>
 

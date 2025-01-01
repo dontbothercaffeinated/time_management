@@ -5,16 +5,20 @@ body {
     padding: 0;
     background-color: #f4f4f9;
     color: #333;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
     min-height: 100vh;
+    overflow: hidden; /* Prevent scrolling the entire page */
+}
+
+/* Dashboard Layout */
+#dashboard {
+    display: flex; /* Enable Flexbox */
+    height: 100vh; /* Full viewport height */
+    overflow: hidden; /* Prevent scrolling the entire page */
 }
 
 h1 {
     text-align: center;
-    margin-top: 20px;
+    margin: 20px 0;
     color: #4CAF50;
 }
 
@@ -47,22 +51,24 @@ form button:hover {
 
 /* Assignments List */
 #assignments {
-    list-style-type: none;
-    padding: 0;
-    margin: 20px auto;
-    max-width: 600px;
+    width: 100%; /* Full width of the container */
+    max-width: 600px; /* Restrict the maximum width */
+    margin: 0 auto; /* Center horizontally */
+    padding: 20px; /* Add spacing inside */
 }
 
+/* Style each assignment item for consistency */
 .assignment-item {
     display: flex;
-    align-items: center;
     justify-content: space-between;
+    align-items: center;
     background-color: #fff;
-    margin: 10px 0;
     padding: 10px;
+    margin: 10px 0;
     border: 1px solid #ddd;
     border-radius: 5px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    width: 100%; /* Ensure items span the full width of the container */
 }
 
 .assignment-item span {
@@ -70,7 +76,7 @@ form button:hover {
     color: #555;
 }
 
-/* Priority Visualization */
+/* Priority Bar */
 .priority-bar {
     position: relative;
     width: 100%;
@@ -94,9 +100,11 @@ form button:hover {
     margin-top: 5px;
 }
 
-/* Filter Select Styles */
+/* Filter Select */
 #filter-select {
     display: block;
+    width: 100%;
+    max-width: 400px;
     margin: 20px auto;
     padding: 10px;
     font-size: 16px;
@@ -259,6 +267,7 @@ form button:hover {
     opacity: 0.8;
 }
 
+/* Timer Section */
 #work-timer {
     margin: 20px auto;
     display: flex;
@@ -266,7 +275,6 @@ form button:hover {
     justify-content: center;
     gap: 10px;
     max-width: 600px;
-    text-align: center;
 }
 
 #work-timer label {
@@ -276,15 +284,8 @@ form button:hover {
 
 #work-duration {
     width: 60px;
-    height: 20px; /* Matches button height */
-    padding: 5px;
-    font-size: 1rem;
-    border: 1px solid #ccc;
-    border-radius: 5px; /* Matches button's border radius */
     text-align: center;
-    line-height: 1;
-    -moz-appearance: textfield; /* Firefox */
-    appearance: textfield; /* Standard */
+    font-size: 1rem;
 }
 
 #work-duration::-webkit-outer-spin-button,
@@ -295,14 +296,12 @@ form button:hover {
 
 #start-stop-button {
     padding: 5px 12px;
-    height: 38px; /* Ensures consistent height */
     font-size: 1rem;
     background-color: #28a745;
-    color: #ffffff;
+    color: white;
     border: none;
-    border-radius: 5px; /* Rounded corners */
+    border-radius: 5px;
     cursor: pointer;
-    transition: background-color 0.3s ease;
 }
 
 #start-stop-button:hover {
@@ -345,9 +344,11 @@ form button:hover {
     border-spacing: 10px; /* Adds spacing between the boxes */
 }
 
+/* Buttons */
 button {
-    margin-left: 8px; /* Space between buttons and the table */
-    border-radius: 4px; /* Optional: round the corners of buttons */
+    border-radius: 4px;
+    margin-left: 8px;
+    cursor: pointer;
 }
 
 li {
@@ -614,34 +615,78 @@ button.dashboard-action:hover {
     opacity: 0.9;
 }
 
-/* Responsive Design */
+/* Dashboard Layout */
+#dashboard {
+    display: flex;
+    height: 100vh; /* Full viewport height */
+    overflow: hidden; /* Prevent global scrolling */
+}
+
+/* Sidebar: Left Side */
+#sidebar {
+    width: 50%; /* Occupy half the screen width */
+    background-color: #f4f4f9; /* Match body background */
+    padding: 20px;
+    overflow-y: auto; /* Enable vertical scrolling inside the sidebar */
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1); /* Subtle shadow for separation */
+}
+
+/* Main Content: Right Side */
+#main-content {
+    width: 50%; /* Occupy the other half of the screen */
+    background-color: #fff; /* Contrasting background color */
+    padding: 20px;
+    overflow-y: auto; /* Enable vertical scrolling inside the main content */
+    display: flex; /* Enable Flexbox */
+    flex-direction: column; /* Stack children vertically */
+    align-items: center; /* Center content horizontally */
+    box-sizing: border-box; /* Include padding in width/height calculation */
+    border-left: 1px solid #ddd; /* Subtle border between sidebar and content */
+}
+
+#assignments {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    width: 100%; /* Fit within the parent container */
+}
+
+html {
+    overflow: hidden; /* Hide the traditional scrollbar on the main page */
+}
+
+/* Custom Scrollbar for Main Content */
+#main-content::-webkit-scrollbar {
+    width: 10px; /* Custom scrollbar width */
+}
+
+#main-content::-webkit-scrollbar-thumb {
+    background-color: #888; /* Scrollbar thumb color */
+    border-radius: 5px; /* Rounded scrollbar thumb */
+}
+
+#main-content::-webkit-scrollbar-thumb:hover {
+    background-color: #555; /* Darker scrollbar thumb on hover */
+}
+
+#main-content::-webkit-scrollbar-track {
+    background-color: #f4f4f9; /* Scrollbar track color */
+}
+
+/* Responsive Design for Smaller Screens */
 @media (max-width: 600px) {
-    form {
-        flex-direction: column;
+    #dashboard {
+        flex-direction: column; /* Stack sidebar and content vertically */
     }
 
-    form input, form select, form button {
-        margin: 10px 0;
+    #sidebar {
+        width: 100%; /* Sidebar takes full width */
+        height: auto; /* Adjust height */
+        position: relative; /* Ensure it flows with content */
     }
 
-    #assignments {
-        padding: 0 20px;
-    }
-
-    .assignment-item {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-
-    .priority-label {
-        text-align: left;
-    }
-
-    #timer-input {
-        width: 100%;
-    }
-
-    #timer-button {
-        width: 100%;
+    #main-content {
+        width: 100%; /* Content takes full width */
+        height: auto; /* Adjust height */
     }
 }
