@@ -306,6 +306,16 @@ ipcMain.handle('open-external-link', async (event, url) => {
     }
 });
 
+ipcMain.handle('updateLinks', async (event, updatedLinks) => {
+    try {
+        fs.writeFileSync(linksPath, JSON.stringify(updatedLinks, null, 2), 'utf-8');
+        return true;
+    } catch (error) {
+        console.error('Error updating links:', error);
+        return false;
+    }
+});
+
 app.whenReady().then(() => {
     createWindow();
     app.on('activate', () => {

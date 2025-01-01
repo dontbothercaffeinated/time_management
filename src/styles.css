@@ -537,6 +537,83 @@ button.dashboard-action:hover {
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Subtle shadow during click */
 }
 
+/* Manage Links Button */
+#manage-links-button {
+    background-color: #f0ad4e; /* Orange */
+    color: white;
+    padding: 10px 15px;
+    margin: 5px;
+    border: none;
+    border-radius: 5px;
+    font-size: 1em;
+    cursor: pointer;
+}
+
+#manage-links-button:hover {
+    opacity: 0.8;
+}
+
+/* Manage Links Popup */
+#manage-links-popup .popup-content {
+    background: #fff;
+    padding: 20px;
+    border-radius: 5px;
+    width: 350px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    text-align: center;
+}
+
+#manage-links-popup h2 {
+    font-size: 1.5em;
+    margin-bottom: 15px;
+}
+
+#manage-links-popup ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+#manage-links-popup ul li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    padding: 5px;
+    background-color: #f9f9f9;
+    border-radius: 5px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+#manage-links-popup ul li button {
+    background-color: #d9534f; /* Red for delete */
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+#manage-links-popup ul li button:hover {
+    opacity: 0.8;
+}
+
+/* Close Button for Manage Links Popup */
+#close-manage-links-button {
+    background-color: #f0ad4e; /* Orange */
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    font-size: 1em;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+#close-manage-links-button:hover {
+    opacity: 0.9;
+}
+
 /* Responsive Design */
 @media (max-width: 600px) {
     form {

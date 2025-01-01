@@ -95,7 +95,7 @@ function updateLinkBubbles() {
         const bubble = document.createElement('div');
         bubble.className = 'link-bubble';
         bubble.textContent = link.name;
-        
+
         // Open link in the default browser on click
         bubble.addEventListener('click', () => {
             window.electron.openExternalLink(link.url);
@@ -132,6 +132,52 @@ async function saveLink() {
 document.getElementById('add-link-button').addEventListener('click', showAddLinkPopup);
 document.getElementById('save-link-button').addEventListener('click', saveLink);
 document.getElementById('cancel-link-button').addEventListener('click', hideAddLinkPopup);
+
+// Fetch and populate the Manage Links popup
+function populateManageLinksPopup() {
+    const linkList = document.getElementById('link-list');
+    linkList.innerHTML = ''; // Clear existing items
+
+    dashboardLinks.forEach((link, index) => {
+        const listItem = document.createElement('li');
+        listItem.textContent = link.name;
+
+        const deleteButton = document.createElement('button');
+        deleteButton.textContent = 'Delete';
+        deleteButton.addEventListener('click', async () => {
+            await deleteLink(index);
+            populateManageLinksPopup(); // Update the popup
+            updateLinkBubbles(); // Update the dashboard
+        });
+
+        listItem.appendChild(deleteButton);
+        linkList.appendChild(listItem);
+    });
+}
+
+// Show and hide the Manage Links popup
+function showManageLinksPopup() {
+    populateManageLinksPopup();
+    document.getElementById('manage-links-popup').style.display = 'flex';
+}
+
+function hideManageLinksPopup() {
+    document.getElementById('manage-links-popup').style.display = 'none';
+}
+
+// Delete a link from the database
+async function deleteLink(index) {
+    try {
+        // Remove the link from the local list and update the backend
+        dashboardLinks.splice(index, 1);
+        await window.electron.updateLinks(dashboardLinks);
+    } catch (error) {
+        console.error('Error deleting link:', error);
+    }
+}
+
+document.getElementById('manage-links-button').addEventListener('click', showManageLinksPopup);
+document.getElementById('close-manage-links-button').addEventListener('click', hideManageLinksPopup);
 
 function startLiveUpdate() {
     setInterval(async () => {
