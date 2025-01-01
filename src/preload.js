@@ -24,4 +24,6 @@ contextBridge.exposeInMainWorld('electron', {
     
     getSystemVariables: async () => await ipcRenderer.invoke('getSystemVariables'),
     updateSystemVariables: async (data) => await ipcRenderer.invoke('updateSystemVariables', data),
+    getSessionWorkTime: async () => await ipcRenderer.invoke('getSessionWorkTime'),
+    updateSessionWorkTime: async (data) => await ipcRenderer.invoke('updateSessionWorkTime', data),
 });

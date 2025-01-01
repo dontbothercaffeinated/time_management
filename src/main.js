@@ -7,6 +7,7 @@ const { executeAlgorithm } = require(path.join(__dirname, 'finalAlgorithm.js'));
 const assignmentsPath = path.join(__dirname, '..', 'db', 'assignments.json');
 const coursesPath = path.join(__dirname, '..', 'db', 'courses.json');
 const systemVariablesPath = path.join(__dirname, '..', 'db', 'system_variables.json');
+const sessionWorkTimePath = path.join(__dirname, '../db/current_session_work_time.json');
 
 // Function to load courses from the JSON database
 async function loadCourses() {
@@ -197,6 +198,28 @@ ipcMain.handle('deleteCourse', async (event, courseName) => {
 // Handle log time requests from renderer
 ipcMain.handle('log-time', async (event, assignmentId, secondsWorked) => {
     return await logTime(assignmentId, secondsWorked);
+});
+
+ipcMain.handle('getSessionWorkTime', async () => {
+    try {
+        const data = fs.existsSync(sessionWorkTimePath)
+            ? JSON.parse(await fs.promises.readFile(sessionWorkTimePath, 'utf-8'))
+            : [];
+        return data;
+    } catch (error) {
+        console.error('Error fetching session work time:', error);
+        return [];
+    }
+});
+
+ipcMain.handle('updateSessionWorkTime', async (event, sessionWorkTime) => {
+    try {
+        await fs.promises.writeFile(sessionWorkTimePath, JSON.stringify(sessionWorkTime, null, 2), 'utf-8');
+        return true;
+    } catch (error) {
+        console.error('Error updating session work time:', error);
+        return false;
+    }
 });
 
 // Fetch system variables from the database
