@@ -73,8 +73,8 @@ async function logTime(assignmentId, secondsWorked) {
 
 function createWindow() {
     const mainWindow = new BrowserWindow({
-        width: 800,
-        height: 600,
+        show: false, // Initially hide the window
+        frame: true, // Retain the window frame (close, minimize, maximize buttons)
         webPreferences: {
             preload: path.join(__dirname, 'preload.js'), // Fix the path
             contextIsolation: true,
@@ -83,6 +83,8 @@ function createWindow() {
     });
 
     mainWindow.loadFile(path.join(__dirname, 'index.html')); // Ensure this path is correct too
+
+    mainWindow.maximize(); // Open the window in a maximized state
 }
 
 ipcMain.handle('fetchData', async () => {
