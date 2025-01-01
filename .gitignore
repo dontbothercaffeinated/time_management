@@ -2,3 +2,4 @@ node_modules/
 db/assignments.json
 db/courses.json
 testingAlgorithm/assignment_logs.json
+db/

@@ -4,6 +4,7 @@ let selectedAssignmentIndex = 0;
 let editingAssignmentIndex = null; // Track the assignment being edited
 let timerInterval = null;
 let selectedAssignmentId = null;
+let dashboardLinks = [];
 
 // Fetch data from the backend
 async function fetchData() {
@@ -73,8 +74,64 @@ async function updateSessionDuration(newDurationSeconds) {
 
 document.addEventListener('DOMContentLoaded', () => {
     fetchData();
+    // related to main dashboard link bubbles
+    fetchLinks();
     startLiveUpdate(); // Start live updates for hours since reset
 });
+
+async function fetchLinks() {
+    try {
+        dashboardLinks = await window.electron.getLinks();
+        updateLinkBubbles();
+    } catch (error) {
+        console.error('Error fetching links:', error);
+    }
+}
+
+function updateLinkBubbles() {
+    const linkContainer = document.getElementById('link-bubbles');
+    linkContainer.innerHTML = '';
+    dashboardLinks.forEach(link => {
+        const bubble = document.createElement('div');
+        bubble.className = 'link-bubble';
+        bubble.textContent = link.name;
+        
+        // Open link in the default browser on click
+        bubble.addEventListener('click', () => {
+            window.electron.openExternalLink(link.url);
+        });
+
+        linkContainer.appendChild(bubble);
+    });
+}
+
+function showAddLinkPopup() {
+    document.getElementById('add-link-popup').style.display = 'flex';
+}
+
+function hideAddLinkPopup() {
+    document.getElementById('add-link-popup').style.display = 'none';
+}
+
+async function saveLink() {
+    const name = document.getElementById('link-name').value.trim();
+    const url = document.getElementById('link-url').value.trim();
+    if (name && url) {
+        try {
+            await window.electron.addLink({ name, url });
+            fetchLinks();
+            hideAddLinkPopup();
+        } catch (error) {
+            console.error('Error saving link:', error);
+        }
+    } else {
+        alert('Please enter both a name and a URL.');
+    }
+}
+
+document.getElementById('add-link-button').addEventListener('click', showAddLinkPopup);
+document.getElementById('save-link-button').addEventListener('click', saveLink);
+document.getElementById('cancel-link-button').addEventListener('click', hideAddLinkPopup);
 
 function startLiveUpdate() {
     setInterval(async () => {

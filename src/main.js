@@ -8,6 +8,9 @@ const assignmentsPath = path.join(__dirname, '..', 'db', 'assignments.json');
 const coursesPath = path.join(__dirname, '..', 'db', 'courses.json');
 const systemVariablesPath = path.join(__dirname, '..', 'db', 'system_variables.json');
 const sessionWorkTimePath = path.join(__dirname, '../db/current_session_work_time.json');
+const linksPath = path.join(__dirname, '..', 'db', 'main_dashboard_url_list.json');
+
+const { shell } = require('electron');
 
 // Function to load courses from the JSON database
 async function loadCourses() {
@@ -264,6 +267,42 @@ ipcMain.handle('execute-algorithm', async () => {
     } catch (error) {
         console.error('Error executing algorithm:', error);
         return { success: false, error: error.message };
+    }
+});
+
+ipcMain.handle('getLinks', async () => {
+    try {
+        const data = fs.existsSync(linksPath)
+            ? JSON.parse(fs.readFileSync(linksPath, 'utf-8'))
+            : [];
+        return data;
+    } catch (error) {
+        console.error('Error fetching links:', error);
+        return [];
+    }
+});
+
+ipcMain.handle('addLink', async (event, newLink) => {
+    try {
+        const data = fs.existsSync(linksPath)
+            ? JSON.parse(fs.readFileSync(linksPath, 'utf-8'))
+            : [];
+        data.push(newLink);
+        fs.writeFileSync(linksPath, JSON.stringify(data, null, 2));
+        return true;
+    } catch (error) {
+        console.error('Error adding link:', error);
+        return false;
+    }
+});
+
+ipcMain.handle('open-external-link', async (event, url) => {
+    try {
+        await shell.openExternal(url);
+        return true;
+    } catch (error) {
+        console.error('Error opening external link:', error);
+        return false;
     }
 });
 

@@ -27,4 +27,7 @@ contextBridge.exposeInMainWorld('electron', {
     getSessionWorkTime: async () => await ipcRenderer.invoke('getSessionWorkTime'),
     updateSessionWorkTime: async (data) => await ipcRenderer.invoke('updateSessionWorkTime', data),
     clearSessionWorkTime: async () => await ipcRenderer.invoke('clearSessionWorkTime'),
+    getLinks: async () => await ipcRenderer.invoke('getLinks'),
+    addLink: async (link) => await ipcRenderer.invoke('addLink', link),
+    openExternalLink: (url) => ipcRenderer.invoke('open-external-link', url),
 });

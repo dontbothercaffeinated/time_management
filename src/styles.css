@@ -415,6 +415,128 @@ li {
     opacity: 0.9; /* Slight hover effect */
 }
 
+/* Add Link Popup */
+#add-link-popup .popup-content {
+    background: #fff; /* White background for the popup */
+    padding: 20px; /* Space around the content */
+    border-radius: 10px; /* Rounded corners */
+    width: 350px; /* Consistent width with other popups */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2); /* Subtle shadow for depth */
+    text-align: center; /* Center-align text */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Styles for input fields inside the Add Link Popup */
+#add-link-popup input {
+    width: 100%; /* Full width of the container */
+    padding: 10px; /* Add padding inside input fields */
+    margin: 10px 0; /* Space between inputs */
+    font-size: 1rem; /* Consistent font size */
+    border: 1px solid #ddd; /* Subtle border */
+    border-radius: 5px; /* Rounded corners */
+}
+
+/* Styles for the action buttons inside the Add Link Popup */
+#add-link-popup .popup-actions {
+    margin-top: 20px; /* Space above the buttons */
+    display: flex; /* Align buttons horizontally */
+    justify-content: center;
+    gap: 10px; /* Space between buttons */
+}
+
+#add-link-popup .popup-actions button {
+    padding: 10px 20px; /* Add padding for buttons */
+    border: none; /* Remove default borders */
+    border-radius: 5px; /* Rounded corners for buttons */
+    font-size: 1rem; /* Consistent font size */
+    cursor: pointer; /* Pointer cursor on hover */
+}
+
+/* Green Save button for Add Link Popup */
+#add-link-popup #save-link-button {
+    background-color: #28a745; /* Green background */
+    color: white; /* White text */
+}
+
+#add-link-popup #save-link-button:hover {
+    opacity: 0.9; /* Slight hover effect */
+}
+
+/* Red Cancel button for Add Link Popup */
+#add-link-popup #cancel-link-button {
+    background-color: #dc3545; /* Red background */
+    color: white; /* White text */
+}
+
+#add-link-popup #cancel-link-button:hover {
+    opacity: 0.9; /* Slight hover effect */
+}
+
+/* Dashboard Buttons (e.g., Add Link Button) */
+#add-link-button {
+    background-color: #4CAF50; /* Primary green color */
+    color: white; /* White text */
+    padding: 10px 15px; /* Padding for size */
+    font-size: 1rem; /* Consistent font size */
+    border: none; /* Remove default border */
+    border-radius: 5px; /* Rounded corners */
+    cursor: pointer; /* Pointer cursor for hover */
+    transition: background-color 0.3s ease; /* Smooth hover effect */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+}
+
+#add-link-button:hover {
+    background-color: #45a049; /* Slightly darker green on hover */
+}
+
+/* Ensure consistency across other buttons on the main dashboard */
+button.dashboard-action {
+    background-color: #4CAF50; /* Primary green color */
+    color: white; /* White text */
+    padding: 10px 15px; /* Padding for size */
+    font-size: 1rem; /* Consistent font size */
+    border: none; /* Remove default border */
+    border-radius: 5px; /* Rounded corners */
+    cursor: pointer; /* Pointer cursor for hover */
+    transition: background-color 0.3s ease; /* Smooth hover effect */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+}
+
+button.dashboard-action:hover {
+    background-color: #45a049; /* Slightly darker green on hover */
+}
+
+/* Styles for Link Bubbles */
+.link-bubble {
+    display: inline-block; /* Make them inline-flex for wrapping */
+    background-color: #007bff; /* Primary blue color */
+    color: white; /* White text for contrast */
+    padding: 8px 15px; /* Padding for size */
+    border-radius: 50px; /* Fully rounded edges */
+    font-size: 1rem; /* Consistent font size */
+    font-weight: bold; /* Make the text stand out */
+    text-align: center; /* Center-align the text */
+    cursor: pointer; /* Pointer cursor for interactivity */
+    transition: background-color 0.3s ease, transform 0.2s ease; /* Smooth hover effects */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+    margin: 5px; /* Space between bubbles */
+}
+
+/* Hover Style for Link Bubbles */
+.link-bubble:hover {
+    background-color: #0056b3; /* Darker blue on hover */
+    transform: scale(1.05); /* Slightly increase size on hover */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15); /* More prominent shadow on hover */
+}
+
+/* Active (Clicked) Style for Link Bubbles */
+.link-bubble:active {
+    transform: scale(0.95); /* Slightly shrink on click */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Subtle shadow during click */
+}
+
 /* Responsive Design */
 @media (max-width: 600px) {
     form {
