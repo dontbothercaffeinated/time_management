@@ -92,6 +92,8 @@ async function enrichAssignments(assignments) {
         const prioritiesResponse = await window.electron.fetchSessionPriorities();
         console.log('Priorities fetched:', prioritiesResponse); // Debugging
 
+        const sessionWorkTime = await window.electron.getSessionWorkTime(); // Fetch current session work time
+
         const sessionDuration = await getSessionDuration(); // Get session duration in seconds
         console.log('Session duration:', sessionDuration); // Debugging
 
@@ -102,20 +104,26 @@ async function enrichAssignments(assignments) {
         }, {});
         console.log('Priorities Map:', prioritiesMap); // Debugging
 
-        // Enrich assignments
-        const enriched = assignments.map((assignment) => ({
+        // Map current session worked seconds by assignment ID
+        const sessionWorkTimeMap = sessionWorkTime.reduce((map, item) => {
+            map[item.assignmentId] = item.timeWorked || 0;
+            return map;
+        }, {});
+
+        // Enrich assignments with additional fields
+        return assignments.map((assignment) => ({
             ...assignment,
-            priorityShare: prioritiesMap[assignment.id] || 0, // Priority share
-            timeToWork: ((prioritiesMap[assignment.id] || 0) * sessionDuration) / 60, // Time to work in minutes
+            priorityShare: prioritiesMap[assignment.id] || 0,
+            timeToWork: ((prioritiesMap[assignment.id] || 0) * sessionDuration) / 60,
+            currentSessionWorkedSeconds: sessionWorkTimeMap[assignment.id] || 0, // Add current session work time
         }));
-        console.log('Enriched Assignments:', enriched); // Debugging
-        return enriched;
     } catch (error) {
         console.error('Error enriching assignments:', error);
         return assignments.map((assignment) => ({
             ...assignment,
             priorityShare: 0,
             timeToWork: 0,
+            currentSessionWorkedSeconds: 0, // Default to 0 on error
         }));
     }
 }
@@ -359,7 +367,8 @@ function updateAssignmentList(assignmentsToRender = assignments, filter = 'all')
                 <div class="variable-box">${(assignment.priorityShare * 100).toFixed(2)}%</div>
                 <div class="variable-box">${assignment.timeToWork.toFixed(2)} mins</div>
                 <div class="variable-box">${new Date(assignment.dueDate * 1000).toLocaleDateString()}</div>
-                <div class="variable-box">${(assignment.workedSeconds / 60).toFixed(2)} mins</div>
+                <div class="variable-box">${(assignment.workedSeconds / 60).toFixed(2)} mins total</div>
+                <div class="variable-box">${(assignment.currentSessionWorkedSeconds / 60).toFixed(2)} mins this session</div>
             </div>
             <button class="edit-button">Edit</button>
             <button class="delete-button">Delete</button>

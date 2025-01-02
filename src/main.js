@@ -90,7 +90,23 @@ function createWindow() {
 ipcMain.handle('fetchData', async () => {
     const courses = JSON.parse(fs.readFileSync(coursesPath, 'utf8'));
     const assignments = JSON.parse(fs.readFileSync(assignmentsPath, 'utf8'));
-    return { courses, assignments };
+    const sessionWorkTime = fs.existsSync(sessionWorkTimePath)
+        ? JSON.parse(fs.readFileSync(sessionWorkTimePath, 'utf8'))
+        : [];
+
+    // Map current session worked seconds by assignment ID
+    const sessionWorkTimeMap = sessionWorkTime.reduce((map, item) => {
+        map[item.assignmentId] = item.timeWorked || 0;
+        return map;
+    }, {});
+
+    // Add current session worked seconds to assignments
+    const enrichedAssignments = assignments.map((assignment) => ({
+        ...assignment,
+        currentSessionWorkedSeconds: sessionWorkTimeMap[assignment.id] || 0,
+    }));
+
+    return { courses, assignments: enrichedAssignments };
 });
 
 ipcMain.handle('addCourse', async (event, courseName) => {
