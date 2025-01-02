@@ -326,22 +326,25 @@ form button:hover {
 }
 
 .variable-box {
-    display: table-cell;
-    border: 1px solid #ccc;        /* Light gray border */
-    padding: 6px 12px;             /* Adds more breathing room inside the boxes */
-    border-radius: 6px;            /* Rounded corners */
-    background-color: #f9f9f9;     /* Light background for contrast */
-    text-align: center;            /* Center text horizontally */
-    vertical-align: middle;        /* Center text vertically */
-    white-space: nowrap;           /* Prevent wrapping */
-    font-size: 0.9em;              /* Slightly smaller font for better aesthetics */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 120px;
+    display: inline-block;
+    vertical-align: middle;
+    border: 1px solid #ccc;
+    padding: 6px 12px;
+    border-radius: 6px;
+    background-color: #f9f9f9;
+    text-align: center;
+    font-size: 0.9em;
 }
 
 .assignment-row {
-    display: table; /* Maintain table structure */
+    display: table;
     width: 100%;
-    table-layout: fixed; /* Ensures consistent alignment */
-    border-spacing: 10px; /* Adds spacing between the boxes */
+    table-layout: fixed;
+    border-spacing: 10px;
 }
 
 /* Buttons */

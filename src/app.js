@@ -41,10 +41,10 @@ async function fetchData() {
 
         const response = await window.electron.fetchData();
         courses = response.courses;
-        assignments = response.assignments;
+        assignments = await enrichAssignments(response.assignments); // Enrich assignments
 
         // Update the UI
-        updateUI();
+        updateUI(assignments);
     } catch (error) {
         console.error('Error fetching data:', error);
     }
@@ -72,6 +72,50 @@ async function updateSessionDuration(newDurationSeconds) {
     }
 }
 
+async function getSessionDuration() {
+    try {
+        const systemVariables = await window.electron.getSystemVariables(); // Fetch system variables
+        return systemVariables.defaultSessionDurationSeconds || 0; // Default to 0 if not defined
+    } catch (error) {
+        console.error('Error fetching session duration:', error);
+        return 0; // Fallback to 0 if there's an error
+    }
+}
+
+async function enrichAssignments(assignments) {
+    try {
+        const prioritiesResponse = await window.electron.fetchSessionPriorities();
+        console.log('Priorities fetched:', prioritiesResponse); // Debugging
+
+        const sessionDuration = await getSessionDuration(); // Get session duration in seconds
+        console.log('Session duration:', sessionDuration); // Debugging
+
+        // Map priorities by assignment ID
+        const prioritiesMap = prioritiesResponse.reduce((map, obj) => {
+            map[obj.id] = obj.totalShare;
+            return map;
+        }, {});
+        console.log('Priorities Map:', prioritiesMap); // Debugging
+
+        // Enrich assignments
+        const enriched = assignments.map((assignment) => ({
+            ...assignment,
+            priorityShare: prioritiesMap[assignment.id] || 0, // Priority share
+            timeToWork: ((prioritiesMap[assignment.id] || 0) * sessionDuration) / 60, // Time to work in minutes
+        }));
+        console.log('Enriched Assignments:', enriched); // Debugging
+        return enriched;
+    } catch (error) {
+        console.error('Error enriching assignments:', error);
+        return assignments.map((assignment) => ({
+            ...assignment,
+            priorityShare: 0,
+            timeToWork: 0,
+        }));
+    }
+}
+
+
 document.addEventListener('DOMContentLoaded', () => {
     fetchData();
     // related to main dashboard link bubbles
@@ -87,6 +131,30 @@ async function fetchLinks() {
         console.error('Error fetching links:', error);
     }
 }
+
+async function addTimeToWork(assignments, sessionDuration) {
+    try {
+        const prioritiesResponse = await window.electron.fetchSessionPriorities();
+        const priorities = prioritiesResponse.reduce((map, obj) => {
+            map[obj.id] = obj.totalShare; // Map assignment ID to its priority share
+            return map;
+        }, {});
+
+        return assignments.map((assignment) => ({
+            ...assignment,
+            priorityShare: priorities[assignment.id] || 0, // Default to 0 if not found
+            timeToWork: (priorities[assignment.id] || 0) * sessionDuration,
+        }));
+    } catch (error) {
+        console.error('Error fetching session priorities:', error);
+        return assignments.map((assignment) => ({
+            ...assignment,
+            priorityShare: 0,
+            timeToWork: 0,
+        }));
+    }
+}
+
 
 function updateLinkBubbles() {
     const linkContainer = document.getElementById('link-bubbles');
@@ -199,7 +267,7 @@ function startLiveUpdate() {
 }
 
 
-function updateUI() {
+function updateUI(enrichedAssignments = []) {
     updateCourseSelect();    // Refresh course dropdowns
     updateFilterSelect();    // Refresh "All Courses" dropdown
     updateAssignmentList();  // Refresh assignments list
@@ -241,13 +309,20 @@ function updateFilterSelect() {
     });
 }
 
-function updateAssignmentList(filter = 'all') {
+function updateAssignmentList(assignmentsToRender = assignments, filter = 'all') {
+    if (!Array.isArray(assignmentsToRender) || assignmentsToRender.length === 0) {
+        console.error("No assignments to render.");
+        return;
+    }
     const assignmentsList = document.getElementById('assignments');
     assignmentsList.innerHTML = '';
-    const filteredAssignments = assignments.filter(
+
+    // Apply the filter
+    const filteredAssignments = assignmentsToRender.filter(
         (a) => filter === 'all' || a.course === filter
     );
 
+    // Populate the list
     filteredAssignments.forEach((assignment, index) => {
         const li = document.createElement('li');
         li.classList.add('assignment-item');
@@ -256,6 +331,8 @@ function updateAssignmentList(filter = 'all') {
             <div class="assignment-row">
                 <div class="variable-box">${assignment.course}</div>
                 <div class="variable-box">${assignment.name}</div>
+                <div class="variable-box">${(assignment.priorityShare * 100).toFixed(2)}%</div>
+                <div class="variable-box">${assignment.timeToWork.toFixed(2)} mins</div>
                 <div class="variable-box">${new Date(assignment.dueDate * 1000).toLocaleDateString()}</div>
                 <div class="variable-box">${(assignment.workedSeconds / 60).toFixed(2)} mins</div>
             </div>
@@ -266,7 +343,6 @@ function updateAssignmentList(filter = 'all') {
 
         li.querySelector('.edit-button').addEventListener('click', () => showEditPopup(index));
         li.querySelector('.delete-button').addEventListener('click', () => deleteAssignment(index));
-        // Add event listener for radio button selection
         li.querySelector(`input[type="radio"]`).addEventListener('change', (event) => {
             selectedAssignmentId = parseInt(event.target.value, 10);
         });
@@ -538,7 +614,8 @@ document.getElementById('project-form').addEventListener('submit', async (event)
 });
 
 document.getElementById('filter-select').addEventListener('change', (event) => {
-    updateAssignmentList(event.target.value);
+    const filter = event.target.value;
+    updateAssignmentList(undefined, filter); // Use the global `assignments` variable
 });
 
 // Attach event listeners for the Manage Courses button

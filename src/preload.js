@@ -31,4 +31,6 @@ contextBridge.exposeInMainWorld('electron', {
     addLink: async (link) => await ipcRenderer.invoke('addLink', link),
     openExternalLink: (url) => ipcRenderer.invoke('open-external-link', url),
     updateLinks: async (links) => await ipcRenderer.invoke('updateLinks', links),
+    fetchSessionPriorities: async () => await ipcRenderer.invoke('fetchSessionPriorities'),
+    
 });

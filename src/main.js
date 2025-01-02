@@ -250,6 +250,19 @@ ipcMain.handle('getSystemVariables', async () => {
     }
 });
 
+ipcMain.handle('fetchSessionPriorities', async () => {
+    const prioritiesPath = path.join(__dirname, '../db/current_session_priorities.json');
+    try {
+        const data = fs.existsSync(prioritiesPath)
+            ? JSON.parse(await fs.promises.readFile(prioritiesPath, 'utf-8'))
+            : [];
+        return data;
+    } catch (error) {
+        console.error('Error fetching session priorities:', error);
+        return [];
+    }
+});
+
 // Update system variables in the database
 ipcMain.handle('updateSystemVariables', async (event, updatedVariables) => {
     try {
