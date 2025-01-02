@@ -692,6 +692,7 @@ async function deleteCourse(index) {
 
                 // Refresh all UI elements: course list, dropdowns, and assignments
                 updateUI(); // Refresh the UI immediately
+                updateFilterSelect(); // Refresh the course filter dropdown
             } else {
                 console.error('Failed to delete course and associated assignments.');
             }
