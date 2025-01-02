@@ -11,14 +11,16 @@ async function fetchData() {
     try {
         // Fetch system variables for session duration
         const systemVariables = await window.electron.getSystemVariables();
-        
-        // Add this to update UI elements dynamically
+
+        // Update UI elements dynamically
         document.getElementById('session-duration').textContent = formatSessionTime(systemVariables.defaultSessionDurationSeconds);
-        // fetch data from current_session_work_time.json total seconds on all assignments
-        // the sum of all seconds for all assignments is the total seconds worked in current session
+
+        let totalLoggedSeconds = 0; // Initialize totalLoggedSeconds
+
         try {
+            // Fetch data from current_session_work_time.json and calculate total logged seconds
             const sessionWorkTime = await window.electron.getSessionWorkTime();
-            const totalLoggedSeconds = sessionWorkTime.reduce((sum, entry) => sum + entry.timeWorked, 0);
+            totalLoggedSeconds = sessionWorkTime.reduce((sum, entry) => sum + entry.timeWorked, 0);
             document.getElementById('time-logged').textContent = formatSessionTime(totalLoggedSeconds);
         } catch (error) {
             console.error('Error fetching session work time:', error);
@@ -27,7 +29,7 @@ async function fetchData() {
         // Update percentage worked
         const percentageWorkedElement = document.getElementById('percentage-worked');
         if (percentageWorkedElement) {
-            const percentage = ((systemVariables.currentSessionLoggedSeconds / systemVariables.defaultSessionDurationSeconds) * 100).toFixed(2);
+            const percentage = ((totalLoggedSeconds / systemVariables.defaultSessionDurationSeconds) * 100).toFixed(2);
             percentageWorkedElement.textContent = `${isNaN(percentage) ? 0 : percentage}%`;
         }
 
@@ -39,6 +41,7 @@ async function fetchData() {
             lastResetElement.textContent = `${hoursSinceReset} hours since last reset`;
         }
 
+        // Fetch courses and assignments
         const response = await window.electron.fetchData();
         courses = response.courses && response.courses.length ? response.courses : [];
         assignments = response.assignments && response.assignments.length
@@ -46,8 +49,7 @@ async function fetchData() {
             : []; // Fallback to an empty array if no assignments
 
         // Update the UI
-        // Update the UI only if assignments exist
-        updateUI(assignments); // Always update the UI, even if assignments are empty
+        updateUI(assignments);
     } catch (error) {
         console.error('Error fetching data:', error);
     }
