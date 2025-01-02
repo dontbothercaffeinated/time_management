@@ -40,11 +40,14 @@ async function fetchData() {
         }
 
         const response = await window.electron.fetchData();
-        courses = response.courses;
-        assignments = await enrichAssignments(response.assignments); // Enrich assignments
+        courses = response.courses && response.courses.length ? response.courses : [];
+        assignments = response.assignments && response.assignments.length
+            ? await enrichAssignments(response.assignments)
+            : []; // Fallback to an empty array if no assignments
 
         // Update the UI
-        updateUI(assignments);
+        // Update the UI only if assignments exist
+        updateUI(assignments); // Always update the UI, even if assignments are empty
     } catch (error) {
         console.error('Error fetching data:', error);
     }
@@ -268,11 +271,25 @@ function startLiveUpdate() {
 
 
 function updateUI(enrichedAssignments = []) {
-    updateCourseSelect();    // Refresh course dropdowns
-    updateFilterSelect();    // Refresh "All Courses" dropdown
-    updateAssignmentList();  // Refresh assignments list
+    // Handle empty courses
+    if (!courses.length) {
+        const courseSelect = document.getElementById('course-select');
+        courseSelect.innerHTML = '<option value="" disabled>No courses available. Add a course first.</option>';
+    } else {
+        updateCourseSelect(); // Refresh course dropdowns
+        updateFilterSelect(); // Refresh "All Courses" dropdown
+    }
+
+    // Handle empty assignments
+    if (!enrichedAssignments.length) {
+        const assignmentsList = document.getElementById('assignments');
+        assignmentsList.innerHTML = '<li>No assignments available. Add a new assignment to get started.</li>';
+    } else {
+        updateAssignmentList(enrichedAssignments); // Refresh assignments list
+    }
+
     resetAssignmentForm();   // Reset the add-assignment form
-    populateCourseList();   // Refresh Manage Courses list
+    populateCourseList();    // Refresh Manage Courses list
 }
 
 // Function to reset the add-assignment form fields
@@ -289,6 +306,10 @@ function resetAssignmentForm() {
 
 function updateCourseSelect() {
     const courseSelect = document.getElementById('course-select');
+    if (!courses.length) {
+        courseSelect.innerHTML = '<option value="" disabled>No courses available. Add a course first.</option>';
+        return;
+    }
     courseSelect.innerHTML = '<option value="">Select a Course</option>';
     courses.forEach((course) => {
         const option = document.createElement('option');
@@ -312,6 +333,8 @@ function updateFilterSelect() {
 function updateAssignmentList(assignmentsToRender = assignments, filter = 'all') {
     if (!Array.isArray(assignmentsToRender) || assignmentsToRender.length === 0) {
         console.error("No assignments to render.");
+        const assignmentsList = document.getElementById('assignments');
+        assignmentsList.innerHTML = '<li>No assignments available. Add a new assignment to get started.</li>';
         return;
     }
     const assignmentsList = document.getElementById('assignments');
