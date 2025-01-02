@@ -355,8 +355,15 @@ function updateAssignmentList(assignmentsToRender = assignments, filter = 'all')
         (a) => filter === 'all' || a.course === filter
     );
 
+    // Sort assignments by remaining time in descending order
+    const sortedAssignments = filteredAssignments.sort((a, b) => {
+        const remainingTimeA = a.timeToWork - (a.currentSessionWorkedSeconds / 60);
+        const remainingTimeB = b.timeToWork - (b.currentSessionWorkedSeconds / 60);
+        return remainingTimeB - remainingTimeA; // Descending order
+    });
+
     // Populate the list
-    filteredAssignments.forEach((assignment, index) => {
+    sortedAssignments.forEach((assignment, index) => {
         const li = document.createElement('li');
         li.classList.add('assignment-item');
         li.innerHTML = `
@@ -369,6 +376,7 @@ function updateAssignmentList(assignmentsToRender = assignments, filter = 'all')
                 <div class="variable-box">${new Date(assignment.dueDate * 1000).toLocaleDateString()}</div>
                 <div class="variable-box">${(assignment.workedSeconds / 60).toFixed(2)} mins total</div>
                 <div class="variable-box">${(assignment.currentSessionWorkedSeconds / 60).toFixed(2)} mins this session</div>
+                <div class="variable-box">${(assignment.timeToWork - (assignment.currentSessionWorkedSeconds / 60)).toFixed(2)} mins remaining</div>
             </div>
             <button class="edit-button">Edit</button>
             <button class="delete-button">Delete</button>
