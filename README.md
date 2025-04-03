@@ -1,3 +1,5 @@
+Temporarily Abandoned: the time calculation & design concept is interesting. There's a worry that using this, as is, opens risk of one of the entries being removed. A future design can incorporate what works in a way that reduces cluttering of each assignment (develiverable/important date). The docs are all over the place. I made them while I was building.
+
 app status: the basic functionality is done, but I haven't spent time testing yet. docs and readme are out of date until enough testing is done. Issues are also out of date for now.
 
 Time management application. Assignments are shown in order of priority. Assignments with the nearest due date with the least amount of time logged are given the highest priority. Use the filter to see the assignment ranking order for tasks in specific courses, or all courses. Base use case has been to manage multiple assignments in multiple courses in university/college. The app can be used outside of this context by defining "assignments" as "tasks" and "courses" as "task categories."
